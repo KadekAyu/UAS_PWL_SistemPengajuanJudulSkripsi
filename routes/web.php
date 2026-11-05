@@ -57,7 +57,7 @@ Route::post('/login', function (Request $request) {
 Route::get('/dashboard', function () {
     return match (Auth::user()->role) {
         'kaprodi' => redirect()->route('kaprodi.dashboard'),
-        'dospem' => abort(501, 'Dashboard dosen pembimbing belum tersedia.'),
+        'dospem' => redirect()->route('dospem.dashboard'),
         default => "Selamat datang di Dashboard Mahasiswa, " . Auth::user()->name . "!",
     };
 })->name('dashboard')->middleware('auth');
@@ -79,3 +79,15 @@ Route::post('/logout', function (Request $request) {
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+
+Route::middleware('auth')->prefix('dospem')->name('dospem.')->group(function () {
+
+    Route::get('/dashboard', function () {
+
+        abort_unless(Auth::user()->role === 'dospem', 403);
+
+        return view('dospem.dashboard');
+
+    })->name('dashboard');
+
+});
