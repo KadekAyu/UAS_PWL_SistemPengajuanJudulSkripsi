@@ -5,6 +5,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\KaprodiDashboardController;
+
+Route::redirect('/', '/login');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -52,8 +55,19 @@ Route::post('/login', function (Request $request) {
 });
 
 Route::get('/dashboard', function () {
-    return "Selamat datang di Dashboard Mahasiswa, " . Auth::user()->name . "!";
+    return match (Auth::user()->role) {
+        'kaprodi' => redirect()->route('kaprodi.dashboard'),
+        'dospem' => abort(501, 'Dashboard dosen pembimbing belum tersedia.'),
+        default => "Selamat datang di Dashboard Mahasiswa, " . Auth::user()->name . "!",
+    };
 })->name('dashboard')->middleware('auth');
+
+Route::middleware('auth')->prefix('kaprodi')->name('kaprodi.')->group(function () {
+    Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/pengajuan/{pengajuan}/sahkan', [KaprodiDashboardController::class, 'sahkan'])
+        ->whereNumber('pengajuan')
+        ->name('pengajuan.sahkan');
+});
 
 Route::post('/logout', function (Request $request) {
     Auth::logout();
