@@ -46,6 +46,7 @@ Route::post('/login', function (Request $request) {
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
+
         return redirect()->intended('dashboard');
     }
 
@@ -58,12 +59,32 @@ Route::get('/dashboard', function () {
     return match (Auth::user()->role) {
         'kaprodi' => redirect()->route('kaprodi.dashboard'),
         'dospem' => abort(501, 'Dashboard dosen pembimbing belum tersedia.'),
-        default => "Selamat datang di Dashboard Mahasiswa, " . Auth::user()->name . "!",
+        'mahasiswa' => redirect()->route('mahasiswa.dashboard'),
+        default => abort(403, 'Role tidak dikenali.'),
     };
 })->name('dashboard')->middleware('auth');
 
+Route::middleware('auth')->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    Route::get('/dashboard', function () {
+        abort_unless(Auth::user()->role === 'mahasiswa', 403);
+
+        $statistics = [
+            'total' => 0,
+            'pending' => 0,
+            'revisi' => 0,
+            'ditolak' => 0,
+        ];
+
+        $pengajuan = collect();
+
+        return view('mahasiswa.dashboard', compact('statistics', 'pengajuan'));
+    })->name('dashboard');
+});
+
 Route::middleware('auth')->prefix('kaprodi')->name('kaprodi.')->group(function () {
-    Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])
+        ->name('dashboard');
+
     Route::post('/pengajuan/{pengajuan}/sahkan', [KaprodiDashboardController::class, 'sahkan'])
         ->whereNumber('pengajuan')
         ->name('pengajuan.sahkan');
@@ -73,6 +94,7 @@ Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
+
     return redirect('/login');
 })->name('logout');
 
