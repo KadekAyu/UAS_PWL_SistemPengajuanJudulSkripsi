@@ -1,12 +1,60 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source "../**/*.blade.php";
-@source "../**/*.js";
-@source "../**/*.vue";
+/* 1. Variabel Warna Tema SISTA */
+:root {
+    --color-sista-bg: #E8F5FF;
+    --color-sista-primary: #38B6FF;
+    --color-sista-hover: #69C9F5;
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/* 2. Style Dasar Seluruh Halaman Sistem */
+body {
+    background-color: var(--color-sista-bg);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #333333;
+}
+
+/* 3. Reusable Custom Classes (Bisa dipakai di semua role) */
+
+/* Layout Card Putih Seragam */
+.sista-card {
+    background-color: #ffffff;
+    border-radius: 1.5rem; /* rounded-3xl */
+    border: 1px solid #E0F2FE; /* border-sky-100 */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Tombol Utama SISTA (Biru Muda) */
+.btn-sista-primary {
+    background-color: var(--color-sista-hover);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.75rem; /* rounded-xl */
+    transition: background-color 0.2s ease;
+}
+
+.btn-sista-primary:hover {
+    background-color: var(--color-sista-primary);
+}
+
+/* Input Form Seragam */
+.input-sista {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid #E5E7EB;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.input-sista:focus {
+    border-color: var(--color-sista-primary);
+    box-shadow: 0 0 0 1px var(--color-sista-primary);
+}
+
+/* Typography Title SISTA */
+.text-sista-title {
+    color: var(--color-sista-primary);
+    font-weight: 800;
 }
