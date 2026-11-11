@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\KaprodiDashboardController;
+use App\Http\Controllers\PengajuanJudulController;
 
 // =====================================
 // HALAMAN UTAMA
@@ -91,7 +92,7 @@ Route::get('/dashboard', function () {
 })->name('dashboard')->middleware('auth');
 
 // =====================================
-// DASHBOARD MAHASISWA
+// DASHBOARD DAN PENGAJUAN MAHASISWA
 // =====================================
 
 Route::middleware('auth')
@@ -99,6 +100,7 @@ Route::middleware('auth')
     ->name('mahasiswa.')
     ->group(function () {
 
+        // DASHBOARD MAHASISWA
         Route::get('/dashboard', function () {
 
             abort_unless(
@@ -121,6 +123,18 @@ Route::middleware('auth')
             );
 
         })->name('dashboard');
+
+        // FORM PENGAJUAN JUDUL
+        Route::get(
+            '/pengajuan',
+            [PengajuanJudulController::class, 'create']
+        )->name('pengajuan.create');
+
+        // SIMPAN PENGAJUAN JUDUL
+        Route::post(
+            '/pengajuan',
+            [PengajuanJudulController::class, 'store']
+        )->name('pengajuan.store');
 
     });
 

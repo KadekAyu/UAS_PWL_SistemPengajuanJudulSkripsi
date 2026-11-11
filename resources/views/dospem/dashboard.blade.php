@@ -4,137 +4,325 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Dosen Pembimbing - SISTA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
 </head>
 
 <body class="min-h-screen bg-[#E8F5FF] text-slate-800">
 
-<div class="min-h-screen md:flex">
+    <div class="min-h-screen md:flex">
 
-    <!-- SIDEBAR -->
-    <aside class="flex w-full flex-col bg-white md:min-h-screen md:w-72">
+        <!-- SIDEBAR -->
+        <aside class="flex w-full flex-col border-b border-sky-100 bg-white md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
 
-        <div class="px-6 py-6">
-            <h1 class="text-4xl font-black text-sky-600">SISTA</h1>
-            <p class="mt-1 text-xs text-slate-500">
-                Panel Dosen Pembimbing
-            </p>
-        </div>
-
-        <nav class="flex gap-2 px-3 md:flex-1 md:flex-col">
-
-            <a href="#dashboard"
-               class="flex items-center gap-3 rounded-xl bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700">
-                <span>▦</span> Dashboard
-            </a>
-
-            <a href="#pengajuan"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-500 hover:bg-sky-50">
-                <span>▤</span> Pengajuan Masuk
-            </a>
-
-            <a href="#riwayat"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-500 hover:bg-sky-50">
-                <span>◷</span> Riwayat Review
-            </a>
-
-            <a href="#profil"
-               class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-500 hover:bg-sky-50">
-                <span style="color: gray;">👤︎</span> Profil
-            </a>
-
-        </nav>
-
-        <div class="border-t p-4">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button class="px-3 py-2 text-sm text-slate-500">
-                    Keluar
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    <!-- KONTEN UTAMA -->
-    <main id="dashboard" class="min-w-0 flex-1 p-5 md:p-8">
-
-        <!-- HEADER + PROFIL -->
-        <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
-
-            <div>
-                <p class="text-xs text-slate-500">
-                    Dashboard Dosen Pembimbing
+            <div class="px-5 py-5">
+                <p class="text-2xl font-black tracking-tight text-sky-600">
+                    SISTA
                 </p>
-                <h2 class="mt-1 text-3xl font-bold text-slate-900">
-                    Selamat datang, {{ auth()->user()->name }}
-                </h2>
-                <p class="mt-2 text-sm text-slate-500">
-                    Pantau dan review pengajuan judul skripsi mahasiswa.
+
+                <p class="mt-1 text-[8px] font-semibold uppercase tracking-widest text-slate-400">
+                    Portal Skripsi Dosen Pembimbing
                 </p>
             </div>
 
-            <div id="profil"
-                 class="flex items-center gap-3 rounded-xl border bg-white px-5 py-3 shadow-sm">
+            <nav class="flex gap-2 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col">
 
-                <div class="text-right">
-                    <p class="text-sm font-semibold">
-                        {{ auth()->user()->name }}
-                    </p>
-                    <p class="text-xs text-slate-500">
-                        Dosen Pembimbing
-                    </p>
-                </div>
+                <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Ruang Akademik
+                </p>
 
-                <div class="flex h-11 w-11 items-center justify-center rounded-full bg-sky-100 text-sky-600 text-xl">
-                    👤
-                </div>
+                <a href="#dashboard"
+                   class="whitespace-nowrap rounded-lg bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700">
+                    Dashboard
+                </a>
 
-                <span class="text-slate-400">⌄</span>
+                <a href="#pengajuan"
+                   class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
+                    Pengajuan Masuk
+                </a>
+
+                <a href="#riwayat"
+                   class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
+                    Riwayat Review
+                </a>
+
+                <a href="#profil"
+                   class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
+                    Profil
+                </a>
+
+            </nav>
+
+            <div class="border-t border-slate-100 p-3">
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+
+                    <button type="submit"
+                        class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-500 transition hover:bg-slate-50 hover:text-slate-800">
+                        Keluar
+                    </button>
+                </form>
             </div>
 
-        </div>
+        </aside>
 
-        <!-- STATISTIK -->
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <!-- KONTEN UTAMA -->
+        <main id="dashboard" class="min-w-0 flex-1">
 
-            @foreach ([
-                ['Total Pengajuan', 'bg-sky-400'],
-                ['Menunggu Review', 'bg-amber-400'],
-                ['Sudah ACC', 'bg-emerald-500'],
-                ['Revisi / Ditolak', 'bg-rose-400']
-            ] as $item)
+            <!-- HEADER -->
+            <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-3 border-b border-sky-100 bg-white px-5 py-2.5 md:px-7">
 
-                <div class="rounded-xl border border-slate-200 bg-white p-5">
-                    <p class="text-xs text-slate-500">
-                        {{ $item[0] }}
-                    </p>
-                    <p class="mt-2 text-2xl font-bold">0</p>
-                    <div class="mt-3 h-1 w-10 rounded-full {{ $item[1] }}"></div>
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span>Dosen Pembimbing</span>
+                    <span class="text-slate-300">›</span>
+                    <span class="font-medium text-slate-700">Dashboard</span>
                 </div>
 
-            @endforeach
+                <div id="profil" class="flex items-center gap-2.5">
 
-        </div>
+                    <div class="text-right">
+                        <p class="max-w-[180px] truncate text-xs font-semibold text-slate-700">
+                            {{ auth()->user()->name }}
+                        </p>
 
-        <!-- PENGAJUAN MASUK -->
-        <section id="pengajuan" class="mt-8 rounded-xl bg-white p-6">
-            <h3 class="font-bold">Pengajuan Masuk</h3>
-            <p class="mt-6 text-center text-sm text-slate-500">
-                Belum ada pengajuan untuk direview.
-            </p>
-        </section>
+                        <p class="text-[10px] text-slate-400">
+                            Dosen Pembimbing
+                        </p>
+                    </div>
 
-        <!-- RIWAYAT REVIEW -->
-        <section id="riwayat" class="mt-6 rounded-xl bg-white p-6">
-            <h3 class="font-bold">Riwayat Review</h3>
-            <p class="mt-6 text-center text-sm text-slate-500">
-                Belum ada riwayat review.
-            </p>
-        </section>
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
+                        {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                    </div>
 
-    </main>
-</div>
+                </div>
+
+            </div>
+
+            <div class="p-4 md:p-6">
+
+                <!-- JUDUL DASHBOARD -->
+                <header class="mb-5">
+
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-sky-700">
+                        Dashboard Dosen Pembimbing
+                    </p>
+
+                    <h1 class="mt-1 text-xl font-bold tracking-tight text-sky-900 md:text-2xl">
+                        Selamat datang, {{ auth()->user()->name }}
+                    </h1>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Pantau dan review pengajuan judul skripsi mahasiswa.
+                    </p>
+
+                </header>
+
+                @if (session('success'))
+                    <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-800">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-xs text-red-700">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <!-- STATISTIK -->
+                <section class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+                    @foreach ([
+                        ['label' => 'Total Pengajuan', 'value' => $statistics['total'] ?? 0, 'tone' => 'sky'],
+                        ['label' => 'Menunggu Review', 'value' => $statistics['pending'] ?? 0, 'tone' => 'amber'],
+                        ['label' => 'Sudah ACC', 'value' => $statistics['disetujui'] ?? 0, 'tone' => 'emerald'],
+                        ['label' => 'Revisi / Ditolak', 'value' => $statistics['revisi'] ?? 0, 'tone' => 'rose'],
+                    ] as $card)
+
+                        <article class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+
+                            <p class="text-xs text-slate-500">
+                                {{ $card['label'] }}
+                            </p>
+
+                            <p class="mt-1 text-xl font-bold text-slate-900">
+                                {{ $card['value'] }}
+                            </p>
+
+                            <div class="mt-2 h-1 w-9 rounded-full {{ [
+                                'sky' => 'bg-sky-400',
+                                'amber' => 'bg-amber-400',
+                                'emerald' => 'bg-emerald-500',
+                                'rose' => 'bg-rose-400',
+                            ][$card['tone']] }}"></div>
+
+                        </article>
+
+                    @endforeach
+
+                </section>
+
+                <!-- PENGAJUAN MASUK -->
+                <section id="pengajuan" class="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
+
+                    <div class="px-4 py-3.5">
+                        <h2 class="text-sm font-bold text-slate-900">
+                            Pengajuan Masuk
+                        </h2>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Daftar pengajuan judul skripsi mahasiswa yang perlu direview.
+                        </p>
+                    </div>
+
+                    <div class="border-t border-slate-100 px-4 py-3">
+
+                        @if (isset($pengajuan) && $pengajuan->isNotEmpty())
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[640px] text-left text-xs">
+
+                                    <thead class="bg-slate-50 text-slate-500">
+                                        <tr>
+                                            <th class="px-4 py-3 font-semibold">No</th>
+                                            <th class="px-4 py-3 font-semibold">Mahasiswa</th>
+                                            <th class="px-4 py-3 font-semibold">Judul Skripsi</th>
+                                            <th class="px-4 py-3 font-semibold">Status</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="divide-y divide-slate-100">
+
+                                        @foreach ($pengajuan as $item)
+                                            <tr>
+                                                <td class="px-4 py-3 text-slate-600">
+                                                    {{ $loop->iteration }}
+                                                </td>
+
+                                                <td class="px-4 py-3 font-medium text-slate-700">
+                                                    {{ $item->mahasiswa->name ?? '-' }}
+                                                </td>
+
+                                                <td class="px-4 py-3 text-slate-600">
+                                                    {{ $item->judul }}
+                                                </td>
+
+                                                <td class="px-4 py-3">
+                                                    <span class="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-700">
+                                                        {{ $item->status }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                        @else
+
+                            <div class="py-7 text-center">
+                                <h3 class="text-xs font-semibold text-slate-700">
+                                    Belum Ada Pengajuan
+                                </h3>
+
+                                <p class="mt-1 text-xs text-slate-500">
+                                    Pengajuan judul dari mahasiswa akan ditampilkan di sini.
+                                </p>
+                            </div>
+
+                        @endif
+
+                    </div>
+
+                </section>
+
+                <!-- RIWAYAT REVIEW -->
+                <section id="riwayat" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+
+                    <div class="px-4 py-3.5">
+                        <h2 class="text-sm font-bold text-slate-900">
+                            Riwayat Review
+                        </h2>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Daftar pengajuan yang sudah pernah direview.
+                        </p>
+                    </div>
+
+                    <div class="border-t border-slate-100 px-4 py-3">
+
+                        @if (isset($riwayat) && $riwayat->isNotEmpty())
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[640px] text-left text-xs">
+
+                                    <thead class="bg-slate-50 text-slate-500">
+                                        <tr>
+                                            <th class="px-4 py-3 font-semibold">No</th>
+                                            <th class="px-4 py-3 font-semibold">Mahasiswa</th>
+                                            <th class="px-4 py-3 font-semibold">Judul Skripsi</th>
+                                            <th class="px-4 py-3 font-semibold">Status</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="divide-y divide-slate-100">
+
+                                        @foreach ($riwayat as $item)
+                                            <tr>
+                                                <td class="px-4 py-3 text-slate-600">
+                                                    {{ $loop->iteration }}
+                                                </td>
+
+                                                <td class="px-4 py-3 font-medium text-slate-700">
+                                                    {{ $item->mahasiswa->name ?? '-' }}
+                                                </td>
+
+                                                <td class="px-4 py-3 text-slate-600">
+                                                    {{ $item->judul }}
+                                                </td>
+
+                                                <td class="px-4 py-3">
+                                                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-700">
+                                                        {{ $item->status }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                        @else
+
+                            <div class="py-7 text-center">
+                                <h3 class="text-xs font-semibold text-slate-700">
+                                    Belum Ada Riwayat Review
+                                </h3>
+
+                                <p class="mt-1 text-xs text-slate-500">
+                                    Pengajuan yang sudah direview akan ditampilkan di sini.
+                                </p>
+                            </div>
+
+                        @endif
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
 
 </body>
 </html>
