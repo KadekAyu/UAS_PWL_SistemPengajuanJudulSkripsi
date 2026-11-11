@@ -11,10 +11,9 @@ class DospemSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'dospem@sista.test'],
+            ['email' => 'dospem@sista.com'],
             [
                 'name' => 'Dr. Budi Santoso',
-                'email' => 'dospem@sista.com',
                 'role' => 'dospem',
                 'password' => Hash::make('dospem12345'),
             ]

@@ -18,17 +18,19 @@ class KaprodiSeeder extends Seeder
             throw new RuntimeException('Set KAPRODI_NAME, KAPRODI_EMAIL, and KAPRODI_PASSWORD in .env before seeding.');
         }
 
-        $kaprodi = User::firstOrCreate(
+        $kaprodi = User::where('email', $email)->first();
+
+        if ($kaprodi && $kaprodi->role !== 'kaprodi') {
+            throw new RuntimeException("The email {$email} is already assigned to a non-Kaprodi account.");
+        }
+
+        User::updateOrCreate(
             ['email' => $email],
             [
                 'name' => $name,
                 'password' => $password,
                 'role' => 'kaprodi',
-            ],
+            ]
         );
-
-        if ($kaprodi->role !== 'kaprodi') {
-            throw new RuntimeException("The email {$email} is already assigned to a non-Kaprodi account.");
-        }
     }
 }
