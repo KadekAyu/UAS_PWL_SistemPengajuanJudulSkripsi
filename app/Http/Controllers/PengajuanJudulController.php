@@ -104,4 +104,30 @@ class PengajuanJudulController extends Controller
 
         return view('mahasiswa.riwayat', compact('user', 'pengajuan'));
     }
+
+    // MENAMPILKAN HALAMAN DETAIL PENGAJUAN JUDUL
+    public function show($id)
+    {
+        $user = Auth::user();
+
+        abort_unless($user->role === 'mahasiswa', 403);
+
+        $pengajuan = DB::table('pengajuan_judul')
+            ->leftJoin('users as dospem1', 'pengajuan_judul.dospem_1_id', '=', 'dospem1.id')
+            ->leftJoin('users as dospem2', 'pengajuan_judul.dospem_2_id', '=', 'dospem2.id')
+            ->select(
+                'pengajuan_judul.*',
+                'dospem1.name as dospem_1_nama',
+                'dospem2.name as dospem_2_nama'
+            )
+            ->where('pengajuan_judul.id', $id)
+            ->where('pengajuan_judul.mahasiswa_id', $user->id)
+            ->first();
+
+        if (!$pengajuan) {
+            abort(404);
+        }
+
+        return view('mahasiswa.pengajuan.detail', compact('user', 'pengajuan'));
+    }
 }

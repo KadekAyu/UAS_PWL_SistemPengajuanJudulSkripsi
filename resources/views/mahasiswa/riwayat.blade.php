@@ -143,7 +143,7 @@
 
                                             <!-- AKSI (Rata Kiri) -->
                                             <td class="px-6 py-4 text-left">
-                                                <a href="#" class="text-sky-600 hover:text-sky-700 font-semibold inline-block">
+                                                <a href="{{ route('mahasiswa.pengajuan.show', $item->id) }}" class="text-sky-600 hover:text-sky-700 font-semibold inline-block">
                                                     Lihat Detail
                                                 </a>
                                             </td>
