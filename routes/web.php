@@ -114,11 +114,29 @@ Route::middleware('auth')
             [PengajuanJudulController::class, 'store']
         )->name('pengajuan.store');
 
-        // HALAMAN RIWAYAT PENGAJUAN (BARU)
+        // HALAMAN RIWAYAT PENGAJUAN
         Route::get(
             '/riwayat',
             [PengajuanJudulController::class, 'riwayat']
         )->name('riwayat');
+
+        // HALAMAN DETAIL PENGAJUAN
+        Route::get(
+            '/pengajuan/{id}',
+            [PengajuanJudulController::class, 'show']
+        )->name('pengajuan.show');
+
+        // FORM EDIT / REVISI PENGAJUAN (BARU)
+        Route::get(
+            '/pengajuan/{id}/edit',
+            [PengajuanJudulController::class, 'edit']
+        )->name('pengajuan.edit');
+
+        // PROSES UPDATE REVISI PENGAJUAN (BARU)
+        Route::put(
+            '/pengajuan/{id}',
+            [PengajuanJudulController::class, 'update']
+        )->name('pengajuan.update');
 
     });
 
