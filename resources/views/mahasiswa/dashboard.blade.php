@@ -8,81 +8,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Mahasiswa - SISTA</title>
-    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <script src="https://cdn.tailwindcss.com"></script>
-    @endif
+    <!-- Menggunakan CDN Tailwind agar langsung rapi tanpa build npm -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="min-h-screen bg-[#E8F5FF] text-slate-800">
 
     <div class="min-h-screen md:flex">
 
-        <!-- SIDEBAR -->
-        <aside class="sista-sidebar flex w-full flex-col md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0">
-
-            <!-- LOGO -->
-            <div class="px-5 py-5">
-                <p class="text-2xl font-black tracking-tight text-sky-600">
-                    SISTA
-                </p>
-
-                <p class="mt-1 text-[8px] font-semibold uppercase tracking-widest text-slate-400">
-                    Portal Skripsi Mahasiswa
-                </p>
-            </div>
-
-            <!-- NAVIGASI -->
-            <nav class="flex gap-2 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col">
-                 <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                    Ruang Akademik
-                 </p>
-
-                 <a href="{{ route('mahasiswa.dashboard') }}" class="sista-nav active">
-                    <i data-lucide="layout-grid" class="h-5 w-5"></i>
-                    <span>Dashboard</span>
-                 </a>
-
-                 <a href="{{ route('mahasiswa.pengajuan.create') }}" class="sista-nav">
-                    <i data-lucide="file-text" class="h-5 w-5"></i>
-                    <span>Pengajuan Judul</span>
-                 </a>
-
-                 <a href="#riwayat" class="sista-nav">
-                    <i data-lucide="clock-3" class="h-5 w-5"></i>
-                    <span>Riwayat Pengajuan</span>
-                 </a>
-
-                 <a href="#profil" class="sista-nav">
-                    <i data-lucide="circle-user-round" class="h-5 w-5"></i>
-                    <span>Profil</span>
-                 </a>
-
-            </nav>
-
-            <!-- LOGOUT -->
-            <div class="border-t border-slate-100 p-3">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-
-                    <button type="submit" class="sista-logout">
-                        <i data-lucide="log-out" class="h-5 w-5"></i>
-                        <span>Logout</span>
-                    </button>
-
-                </form>
-            </div>
-
-        </aside>
+        <x-sidebar-mahasiswa />
 
         <!-- MAIN CONTENT -->
         <main class="min-w-0 flex-1">
 
             <!-- TOPBAR -->
-            <div class="sista-topbar">
+            <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-sky-100">
 
                 <div class="flex items-center gap-2 text-xs text-slate-500">
                     <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -100,7 +41,7 @@
                 <div class="flex items-center gap-2.5">
 
                     <div class="text-right">
-                        <p class="sista-user-name">
+                        <p class="text-xs font-bold text-slate-800">
                             {{ $user->name }}
                         </p>
 
@@ -109,7 +50,7 @@
                         </p>
                     </div>
 
-                    <div class="sista-avatar">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-600 text-xs">
                         {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
                     </div>
 
@@ -118,10 +59,10 @@
             </div>
 
             <!-- PAGE CONTENT -->
-            <div class="sista-dashboard-content">
+            <div class="p-6">
 
                 <!-- HEADER -->
-                <header class="sista-dashboard-header">
+                <header class="mb-6">
 
                     <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                         Dashboard Mahasiswa
@@ -161,7 +102,7 @@
                         ['label' => 'Ditolak', 'value' => $statistics['ditolak'], 'tone' => 'rose'],
                     ] as $card)
 
-                        <article class="rounded-xl border border-sky-100 bg-white px-4 py-3">
+                        <article class="rounded-xl border border-sky-100 bg-white px-4 py-3 shadow-sm">
 
                             <p class="text-xs text-slate-500">
                                 {{ $card['label'] }}
@@ -187,7 +128,7 @@
                 </section>
 
                 <!-- PENGAJUAN JUDUL -->
-                <section class="mb-4 overflow-hidden rounded-xl border border-sky-100 bg-white">
+                <section class="mb-4 overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
                     <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
 
@@ -202,7 +143,7 @@
                         </div>
 
                         <a href="{{ route('mahasiswa.pengajuan.create') }}"
-                           class="sista-button sista-button-submit">
+                           class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-xs transition shadow-sm">
                             <span>+ Ajukan Judul Baru</span>
                         </a>
 
@@ -228,7 +169,7 @@
                 </section>
 
                 <!-- RIWAYAT PENGAJUAN -->
-                <section id="riwayat" class="overflow-hidden rounded-xl border border-sky-100 bg-white">
+                <section id="riwayat" class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
                     <div class="border-b border-slate-100 px-4 py-3">
 
@@ -326,10 +267,6 @@
         </main>
 
     </div>
-
-    <script>
-    lucide.createIcons();
-    </script>
 
 </body>
 </html>
