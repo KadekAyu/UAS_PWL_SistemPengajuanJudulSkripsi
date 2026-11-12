@@ -44,7 +44,7 @@
                     Dashboard
                 </a>
 
-                <a href="#pengajuan"
+                <a href="{{ route('dospem.pengajuan.index') }}"
                    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
                     <i data-lucide="file-text" class="h-5 w-5"></i>
                     Pengajuan Masuk
@@ -70,7 +70,7 @@
                     @csrf
 
                     <button type="submit"
-                        class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                        class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 hover:text-rose-700">
                         <i data-lucide="log-out" class="h-5 w-5"></i>
                         Logout
                     </button>
@@ -152,7 +152,7 @@
                         ['label' => 'Total Pengajuan', 'value' => $statistics['total'] ?? 0, 'tone' => 'sky'],
                         ['label' => 'Menunggu Review', 'value' => $statistics['pending'] ?? 0, 'tone' => 'amber'],
                         ['label' => 'Sudah ACC', 'value' => $statistics['disetujui'] ?? 0, 'tone' => 'emerald'],
-                        ['label' => 'Revisi / Ditolak', 'value' => $statistics['revisi'] ?? 0, 'tone' => 'rose'],
+                        ['label' => 'Revisi / Ditolak', 'value' => ($statistics['revisi'] ?? 0) + ($statistics['ditolak'] ?? 0), 'tone' => 'rose'],
                     ] as $card)
 
                         <article class="rounded-xl border border-slate-200 bg-white px-4 py-3">
@@ -182,22 +182,16 @@
                 <section id="pengajuan" class="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
 
                     <div class="px-4 py-3.5">
-                        <h2 class="text-sm font-bold text-slate-900">
-                            Pengajuan Masuk
-                        </h2>
-
+                        <h2 class="text-sm font-bold text-slate-900">Pengajuan Masuk</h2>
                         <p class="mt-1 text-xs text-slate-500">
                             Daftar pengajuan judul skripsi mahasiswa yang perlu direview.
                         </p>
                     </div>
 
                     <div class="border-t border-slate-100 px-4 py-3">
-
-                        @if (isset($pengajuan) && $pengajuan->isNotEmpty())
-
+                        @if ($pengajuanMasuk->isNotEmpty())
                             <div class="overflow-x-auto">
                                 <table class="w-full min-w-[640px] text-left text-xs">
-
                                     <thead class="bg-slate-50 text-slate-500">
                                         <tr>
                                             <th class="px-4 py-3 font-semibold">No</th>
@@ -208,50 +202,41 @@
                                     </thead>
 
                                     <tbody class="divide-y divide-slate-100">
-
-                                        @foreach ($pengajuan as $item)
+                                        @foreach ($pengajuanMasuk as $item)
                                             <tr>
                                                 <td class="px-4 py-3 text-slate-600">
                                                     {{ $loop->iteration }}
                                                 </td>
-
-                                                <td class="px-4 py-3 font-medium text-slate-700">
-                                                    {{ $item->mahasiswa->name ?? '-' }}
+                                                <td class="px-4 py-3">
+                                                    <p class="font-semibold text-slate-700">
+                                                        {{ $item->nama_mahasiswa ?? '-' }}
+                                                    </p>
+                                                    <p class="mt-1 text-[10px] text-slate-400">
+                                                        {{ $item->npm_mahasiswa ?? '-' }}
+                                                    </p>
                                                 </td>
-
                                                 <td class="px-4 py-3 text-slate-600">
                                                     {{ $item->judul }}
                                                 </td>
-
                                                 <td class="px-4 py-3">
                                                     <span class="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-700">
-                                                        {{ $item->status }}
+                                                        {{ ucfirst($item->status) }}
                                                     </span>
                                                 </td>
                                             </tr>
                                         @endforeach
-
                                     </tbody>
-
                                 </table>
                             </div>
-
                         @else
-
                             <div class="py-7 text-center">
-                                <h3 class="text-xs font-semibold text-slate-700">
-                                    Belum Ada Pengajuan
-                                </h3>
-
+                                <h3 class="text-xs font-semibold text-slate-700">Belum Ada Pengajuan</h3>
                                 <p class="mt-1 text-xs text-slate-500">
-                                    Pengajuan judul dari mahasiswa akan ditampilkan di sini.
+                                    Pengajuan dari mahasiswa yang memilih Anda sebagai dosen pembimbing akan ditampilkan di sini.
                                 </p>
                             </div>
-
                         @endif
-
                     </div>
-
                 </section>
 
                 <!-- RIWAYAT REVIEW -->
@@ -292,7 +277,7 @@
                                                 </td>
 
                                                 <td class="px-4 py-3 font-medium text-slate-700">
-                                                    {{ $item->mahasiswa->name ?? '-' }}
+                                                    {{ $item->nama_mahasiswa ?? '-' }}
                                                 </td>
 
                                                 <td class="px-4 py-3 text-slate-600">
