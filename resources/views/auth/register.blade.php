@@ -66,7 +66,14 @@
 
             </div>
 
-            <!-- Pesan Error -->
+            <!-- Pesan Sukses Berhasil Register (Tanpa teks tambahan karena di bawah sudah ada) -->
+            @if (session('success'))
+                <div class="mb-3 p-3 bg-green-50 border border-green-200 rounded-xl text-[11px] text-green-700 font-semibold">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <!-- Pesan Error Validasi -->
             @if ($errors->any())
                 <div class="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-600">
                     <ul class="list-disc list-inside space-y-1">
@@ -192,7 +199,7 @@
 
             </form>
 
-            <!-- Link Login -->
+            <!-- Link Login Bawaan -->
             <div class="mt-4 text-center text-[11px] text-gray-400">
 
                 Sudah punya akun?

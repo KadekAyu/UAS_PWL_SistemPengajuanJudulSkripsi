@@ -39,9 +39,7 @@ Route::post('/register', function (Request $request) {
         'role'     => 'mahasiswa',
     ]);
 
-    Auth::login($user);
-
-    return redirect()->route('dashboard');
+    return back()->with('success', 'Akun berhasil dibuat! Silakan klik teks login di bawah jika ingin masuk.');
 });
 
 // =====================================
@@ -101,28 +99,7 @@ Route::middleware('auth')
     ->group(function () {
 
         // DASHBOARD MAHASISWA
-        Route::get('/dashboard', function () {
-
-            abort_unless(
-                Auth::user()->role === 'mahasiswa',
-                403
-            );
-
-            $statistics = [
-                'total' => 0,
-                'pending' => 0,
-                'revisi' => 0,
-                'ditolak' => 0,
-            ];
-
-            $pengajuan = collect();
-
-            return view(
-                'mahasiswa.dashboard',
-                compact('statistics', 'pengajuan')
-            );
-
-        })->name('dashboard');
+        Route::get('/dashboard', [PengajuanJudulController::class, 'index'])->name('dashboard');
 
         // FORM PENGAJUAN JUDUL
         Route::get(
@@ -135,6 +112,12 @@ Route::middleware('auth')
             '/pengajuan',
             [PengajuanJudulController::class, 'store']
         )->name('pengajuan.store');
+
+        // HALAMAN RIWAYAT PENGAJUAN (BARU)
+        Route::get(
+            '/riwayat',
+            [PengajuanJudulController::class, 'riwayat']
+        )->name('riwayat');
 
     });
 
