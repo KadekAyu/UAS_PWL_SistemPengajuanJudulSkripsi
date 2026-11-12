@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Mahasiswa - SISTA</title>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -36,44 +37,29 @@
 
             <!-- NAVIGASI -->
             <nav class="flex gap-2 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col">
-
-                <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                 <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Ruang Akademik
-                </p>
+                 </p>
 
-                <a href="{{ route('mahasiswa.dashboard') }}" class="sista-nav active">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <rect x="4" y="4" width="6" height="6" rx="1"/>
-                        <rect x="14" y="4" width="6" height="6" rx="1"/>
-                        <rect x="4" y="14" width="6" height="6" rx="1"/>
-                        <rect x="14" y="14" width="6" height="6" rx="1"/>
-                    </svg>
+                 <a href="{{ route('mahasiswa.dashboard') }}" class="sista-nav active">
+                    <i data-lucide="layout-grid" class="h-5 w-5"></i>
                     <span>Dashboard</span>
-                </a>
+                 </a>
 
-                <a href="{{ route('mahasiswa.pengajuan.create') }}" class="sista-nav">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/>
-                        <path d="M13 3v7h7M8 15h8M8 18h5"/>
-                    </svg>
+                 <a href="{{ route('mahasiswa.pengajuan.create') }}" class="sista-nav">
+                    <i data-lucide="file-text" class="h-5 w-5"></i>
                     <span>Pengajuan Judul</span>
-                </a>
+                 </a>
 
-                <a href="#riwayat" class="sista-nav">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="M12 7v5l3 2"/>
-                    </svg>
+                 <a href="#riwayat" class="sista-nav">
+                    <i data-lucide="clock-3" class="h-5 w-5"></i>
                     <span>Riwayat Pengajuan</span>
-                </a>
+                 </a>
 
-                <a href="#profil" class="sista-nav">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
-                    </svg>
+                 <a href="#profil" class="sista-nav">
+                    <i data-lucide="circle-user-round" class="h-5 w-5"></i>
                     <span>Profil</span>
-                </a>
+                 </a>
 
             </nav>
 
@@ -83,12 +69,10 @@
                     @csrf
 
                     <button type="submit" class="sista-logout">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M10 17l5-5-5-5M15 12H3"/>
-                            <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>
-                        </svg>
+                        <i data-lucide="log-out" class="h-5 w-5"></i>
                         <span>Logout</span>
                     </button>
+
                 </form>
             </div>
 
@@ -342,6 +326,10 @@
         </main>
 
     </div>
+
+    <script>
+    lucide.createIcons();
+    </script>
 
 </body>
 </html>

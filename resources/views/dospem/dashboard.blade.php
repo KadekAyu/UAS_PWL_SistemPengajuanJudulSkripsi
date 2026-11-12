@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Dosen Pembimbing - SISTA</title>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -16,9 +17,10 @@
 
     <div class="min-h-screen md:flex">
 
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR DOSEN PEMBIMBING -->
         <aside class="flex w-full flex-col border-b border-sky-100 bg-white md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
 
+            <!-- LOGO APLIKASI -->
             <div class="px-5 py-5">
                 <p class="text-2xl font-black tracking-tight text-sky-600">
                     SISTA
@@ -29,6 +31,7 @@
                 </p>
             </div>
 
+            <!-- NAVIGASI SIDEBAR -->
             <nav class="flex gap-2 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col">
 
                 <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
@@ -36,35 +39,42 @@
                 </p>
 
                 <a href="#dashboard"
-                   class="whitespace-nowrap rounded-lg bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700">
+                   class="flex items-center gap-3 whitespace-nowrap rounded-lg bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700">
+                    <i data-lucide="layout-grid" class="h-5 w-5"></i>
                     Dashboard
                 </a>
 
                 <a href="#pengajuan"
-                   class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
+                   class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
+                    <i data-lucide="file-text" class="h-5 w-5"></i>
                     Pengajuan Masuk
                 </a>
 
                 <a href="#riwayat"
-                   class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
+                   class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
+                    <i data-lucide="clock-3" class="h-5 w-5"></i>
                     Riwayat Review
                 </a>
 
                 <a href="#profil"
-                   class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
+                   class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
+                    <i data-lucide="circle-user-round" class="h-5 w-5"></i>
                     Profil
                 </a>
 
             </nav>
 
+            <!-- TOMBOL LOGOUT -->
             <div class="border-t border-slate-100 p-3">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
 
                     <button type="submit"
-                        class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-500 transition hover:bg-slate-50 hover:text-slate-800">
-                        Keluar
+                        class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                        <i data-lucide="log-out" class="h-5 w-5"></i>
+                        Logout
                     </button>
+
                 </form>
             </div>
 
@@ -82,6 +92,7 @@
                     <span class="font-medium text-slate-700">Dashboard</span>
                 </div>
 
+                <!-- PROFIL DOSEN YANG LOGIN -->
                 <div id="profil" class="flex items-center gap-2.5">
 
                     <div class="text-right">
@@ -121,6 +132,7 @@
 
                 </header>
 
+                <!-- NOTIFIKASI BERHASIL DAN ERROR -->
                 @if (session('success'))
                     <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-800">
                         {{ session('success') }}
@@ -323,6 +335,11 @@
         </main>
 
     </div>
+
+    <!-- AKTIFKAN IKON LUCIDE -->
+    <script>
+        lucide.createIcons();
+    </script>
 
 </body>
 </html>
