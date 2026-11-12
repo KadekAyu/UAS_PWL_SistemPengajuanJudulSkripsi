@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DospemDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -171,16 +172,17 @@ Route::middleware('auth')
     ->name('dospem.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
+        // Dashboard Dosen Pembimbing
+        Route::get(
+            '/dashboard',
+            [DospemDashboardController::class, 'index']
+        )->name('dashboard');
 
-            abort_unless(
-                Auth::user()->role === 'dospem',
-                403
-            );
-
-            return view('dospem.dashboard');
-
-        })->name('dashboard');
+        // Halaman Pengajuan Masuk
+        Route::get(
+            '/pengajuan',
+            [DospemDashboardController::class, 'pengajuanMasuk']
+        )->name('pengajuan.index');
 
     });
 
