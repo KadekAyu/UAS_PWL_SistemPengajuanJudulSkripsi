@@ -22,41 +22,9 @@
         <!-- MAIN CONTENT -->
         <main class="min-w-0 flex-1">
 
-            <!-- TOPBAR -->
-            <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-sky-100">
-
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="m3 11 9-8 9 8"/>
-                        <path d="M5 10v10h14V10"/>
-                        <path d="M9 20v-6h6v6"/>
-                    </svg>
-
-                    <span>Mahasiswa</span>
-                    <span class="text-slate-300">›</span>
-                    <span class="font-semibold text-slate-800">Dashboard</span>
-                </div>
-
-                <!-- PROFIL -->
-                <div class="flex items-center gap-2.5">
-
-                    <div class="text-right">
-                        <p class="text-xs font-bold text-slate-800">
-                            {{ $user->name }}
-                        </p>
-
-                        <p class="text-[10px] text-slate-400">
-                            NPM {{ $user->npm }}
-                        </p>
-                    </div>
-
-                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-600 text-xs">
-                        {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
-                    </div>
-
-                </div>
-
-            </div>
+            <x-topbar-mahasiswa>
+                <span class="font-semibold text-slate-800">Dashboard Mahasiswa</span>
+            </x-topbar-mahasiswa>
 
             <!-- PAGE CONTENT -->
             <div class="p-6">

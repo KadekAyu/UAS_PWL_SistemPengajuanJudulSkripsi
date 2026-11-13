@@ -64,13 +64,8 @@ class PengajuanJudulController extends Controller
         $dospem1 = User::findOrFail($validated['dospem_1_id']);
         $dospem2 = User::findOrFail($validated['dospem_2_id']);
 
-        // 1. Ambil nama asli file yang di-upload user
         $originalName = $request->file('file_proposal')->getClientOriginalName();
-        
-        // 2. Beri tambahan timestamp unik di depannya agar nama file di folder server tidak bentrok
         $fileName = time() . '_' . $originalName;
-
-        // 3. Simpan file menggunakan storeAs ke folder storage/app/public/proposal
         $file = $request->file('file_proposal')->storeAs('proposal', $fileName, 'public');
 
         DB::table('pengajuan_judul')->insert([
@@ -129,5 +124,94 @@ class PengajuanJudulController extends Controller
         }
 
         return view('mahasiswa.pengajuan.detail', compact('user', 'pengajuan'));
+    }
+
+    // ==========================================
+    // FUNGSI EDIT & UPDATE REVISI
+    // ==========================================
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+        abort_unless($user->role === 'mahasiswa', 403);
+
+        $pengajuan = DB::table('pengajuan_judul')
+            ->leftJoin('users as dospem1', 'pengajuan_judul.dospem_1_id', '=', 'dospem1.id')
+            ->leftJoin('users as dospem2', 'pengajuan_judul.dospem_2_id', '=', 'dospem2.id')
+            ->select(
+                'pengajuan_judul.*',
+                'dospem1.name as dospem_1_nama',
+                'dospem2.name as dospem_2_nama'
+            )
+            ->where('pengajuan_judul.id', $id)
+            ->where('mahasiswa_id', $user->id)
+            ->first();
+
+        if (!$pengajuan || $pengajuan->status !== 'revisi') {
+            abort(403, 'Pengajuan tidak dapat direvisi.');
+        }
+
+        return view('mahasiswa.pengajuan.edit', compact('user', 'pengajuan'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        abort_unless($user->role === 'mahasiswa', 403);
+
+        $pengajuan = DB::table('pengajuan_judul')
+            ->where('id', $id)
+            ->where('mahasiswa_id', $user->id)
+            ->first();
+
+        if (!$pengajuan || $pengajuan->status !== 'revisi') {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'judul' => 'required|string|max:255',
+            'abstrak' => 'required|string',
+            'dospem_1_id' => 'required|exists:users,id',
+            'dospem_2_id' => 'required|exists:users,id',
+            'file_proposal' => 'nullable|file|mimes:pdf|max:5120',
+        ]);
+
+        $filePath = $pengajuan->file_proposal;
+
+        if ($request->hasFile('file_proposal')) {
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+
+            $originalName = $request->file('file_proposal')->getClientOriginalName();
+            $fileName = time() . '_' . $originalName;
+            $filePath = $request->file('file_proposal')->storeAs('proposal', $fileName, 'public');
+        }
+
+        DB::table('pengajuan_judul')->where('id', $id)->update([
+            'judul' => $validated['judul'],
+            'abstrak' => $validated['abstrak'],
+            'dospem_1_id' => $validated['dospem_1_id'],
+            'dospem_2_id' => $validated['dospem_2_id'],
+            'file_proposal' => $filePath,
+            'status' => 'menunggu',
+            'updated_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('mahasiswa.pengajuan.show', $id)
+            ->with('success', 'Revisi pengajuan berhasil dikirim dan menunggu tinjauan dosen.');
+    }
+
+    // ==========================================
+    // FUNGSI PROFIL MAHASISWA
+    // ==========================================
+
+    public function profil()
+    {
+        $user = Auth::user();
+        abort_unless($user->role === 'mahasiswa', 403);
+
+        return view('mahasiswa.profil', compact('user'));
     }
 }

@@ -15,34 +15,22 @@
 
     <div class="min-h-screen md:flex">
 
+        <!-- Sidebar Mahasiswa -->
         <x-sidebar-mahasiswa />
 
         <!-- MAIN CONTENT -->
         <main class="min-w-0 flex-1">
 
-            <!-- TOPBAR -->
-            <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-sky-100">
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <span>Mahasiswa</span>
-                    <span class="text-slate-300">›</span>
-                    <a href="{{ route('mahasiswa.riwayat') }}" class="hover:underline">Riwayat Pengajuan</a>
-                    <span class="text-slate-300">›</span>
-                    <span class="font-semibold text-slate-800">Detail Pengajuan</span>
-                </div>
+            <!-- Topbar Terpusat -->
+            <x-topbar-mahasiswa>
+                <span>Mahasiswa</span>
+                <span class="text-slate-300">›</span>
+                <a href="{{ route('mahasiswa.riwayat') }}" class="hover:underline">Riwayat Pengajuan</a>
+                <span class="text-slate-300">›</span>
+                <span class="font-semibold text-slate-800">Detail Pengajuan</span>
+            </x-topbar-mahasiswa>
 
-                <!-- PROFIL -->
-                <div class="flex items-center gap-2.5">
-                    <div class="text-right">
-                        <p class="text-xs font-bold text-slate-800">{{ $user->name }}</p>
-                        <p class="text-[10px] text-slate-400">NPM {{ $user->npm }}</p>
-                    </div>
-                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-600 text-xs">
-                        {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- PAGE CONTENT -->
+            <!-- PAGE CONTENT CONTAINER -->
             <div class="p-8 max-w-5xl mx-auto space-y-6">
 
                 <!-- HEADER & BREADCRUMB/STATUS INFO -->
@@ -140,7 +128,7 @@
                                 Catatan & Evaluasi Dosen Pembimbing
                             </h3>
 
-                            <!-- Card Komentar Dospem 1 (Dinamis dari Database) -->
+                            <!-- Card Komentar Dospem 1 -->
                             <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 space-y-3">
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700 text-xs">
@@ -159,7 +147,7 @@
                                 </p>
                             </div>
 
-                            <!-- Card Komentar Dospem 2 (Dinamis dari Database) -->
+                            <!-- Card Komentar Dospem 2 -->
                             <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 space-y-3">
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700 text-xs">
