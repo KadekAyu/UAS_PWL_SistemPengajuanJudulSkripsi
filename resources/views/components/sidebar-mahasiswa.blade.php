@@ -51,15 +51,6 @@
             <span>Riwayat Pengajuan</span>
         </a>
 
-        <!-- Menu Profil -->
-        <a href="#profil" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
-            </svg>
-            <span>Profil</span>
-        </a>
-
     </nav>
 
     <!-- LOGOUT -->

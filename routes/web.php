@@ -84,7 +84,7 @@ Route::get('/dashboard', function () {
 
         'mahasiswa' => redirect()->route('mahasiswa.dashboard'),
 
-        default => abort(403, 'Role tidak dikenali.'),
+        'default' => abort(403, 'Role tidak dikenali.'),
 
     };
 
@@ -126,17 +126,23 @@ Route::middleware('auth')
             [PengajuanJudulController::class, 'show']
         )->name('pengajuan.show');
 
-        // FORM EDIT / REVISI PENGAJUAN (BARU)
+        // FORM EDIT / REVISI PENGAJUAN
         Route::get(
             '/pengajuan/{id}/edit',
             [PengajuanJudulController::class, 'edit']
         )->name('pengajuan.edit');
 
-        // PROSES UPDATE REVISI PENGAJUAN (BARU)
+        // PROSES UPDATE REVISI PENGAJUAN
         Route::put(
             '/pengajuan/{id}',
             [PengajuanJudulController::class, 'update']
         )->name('pengajuan.update');
+
+        // HALAMAN PROFIL MAHASISWA (TAMBAHAN BARU)
+        Route::get(
+            '/profil',
+            [PengajuanJudulController::class, 'profil']
+        )->name('profil');
 
     });
 
