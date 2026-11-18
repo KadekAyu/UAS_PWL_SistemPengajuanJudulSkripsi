@@ -38,15 +38,10 @@
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-xs font-semibold text-sky-600 tracking-wide uppercase">Pengajuan Aktif</span>
-                            <span class="text-slate-300">•</span>
-                            <span class="text-xs text-slate-400">ID #{{ $pengajuan->id }}</span>
                         </div>
                         <h1 class="text-2xl font-bold tracking-tight text-slate-900">
                             Detail Pengajuan
                         </h1>
-                        <p class="mt-1 text-xs text-slate-500">
-                            Tinjau status, informasi proposal, dan catatan dosen pembimbing untuk pengajuan ini.
-                        </p>
                     </div>
 
                     <div class="flex items-center gap-3">
@@ -57,9 +52,6 @@
                             </a>
                         @endif
 
-                        <a href="{{ route('mahasiswa.riwayat') }}" class="px-4 py-2 bg-white border border-sky-200 text-sky-600 hover:bg-sky-50 text-xs font-semibold rounded-xl shadow-sm transition">
-                            ← Kembali ke Riwayat
-                        </a>
                     </div>
                 </div>
 

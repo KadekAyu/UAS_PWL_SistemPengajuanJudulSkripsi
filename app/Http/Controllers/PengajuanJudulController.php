@@ -59,6 +59,8 @@ class PengajuanJudulController extends Controller
             'dospem_1_id' => 'required|different:dospem_2_id|exists:users,id',
             'dospem_2_id' => 'required|exists:users,id',
             'file_proposal' => 'required|file|mimes:pdf|max:5120',
+            // Validasi tambahan agar nilai status string varchar konsisten
+            'status' => 'nullable|string|in:menunggu,revisi,disetujui,ditolak',
         ]);
 
         $dospem1 = User::findOrFail($validated['dospem_1_id']);
@@ -75,7 +77,7 @@ class PengajuanJudulController extends Controller
             'file_proposal' => $file,
             'dospem_1_id' => $dospem1->id,
             'dospem_2_id' => $dospem2->id,
-            'status' => 'menunggu',
+            'status' => $validated['status'] ?? 'menunggu',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -171,8 +173,6 @@ class PengajuanJudulController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'abstrak' => 'required|string',
-            'dospem_1_id' => 'required|exists:users,id',
-            'dospem_2_id' => 'required|exists:users,id',
             'file_proposal' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
@@ -191,8 +191,6 @@ class PengajuanJudulController extends Controller
         DB::table('pengajuan_judul')->where('id', $id)->update([
             'judul' => $validated['judul'],
             'abstrak' => $validated['abstrak'],
-            'dospem_1_id' => $validated['dospem_1_id'],
-            'dospem_2_id' => $validated['dospem_2_id'],
             'file_proposal' => $filePath,
             'status' => 'menunggu',
             'updated_at' => now(),
