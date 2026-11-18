@@ -138,7 +138,13 @@ Route::middleware('auth')
             [PengajuanJudulController::class, 'update']
         )->name('pengajuan.update');
 
-        // HALAMAN PROFIL MAHASISWA (TAMBAHAN BARU)
+        // CETAK / DOWNLOAD SURAT PENGESAHAN PDF (BARU)
+        Route::get(
+            '/pengajuan/{id}/surat',
+            [PengajuanJudulController::class, 'cetakSurat']
+        )->name('pengajuan.surat');
+
+        // HALAMAN PROFIL MAHASISWA
         Route::get(
             '/profil',
             [PengajuanJudulController::class, 'profil']

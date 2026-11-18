@@ -70,17 +70,17 @@
                                     <span class="text-[10px] uppercase tracking-wider text-slate-400 block mb-1">Status Saat Ini</span>
                                     <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium {{
                                         match($pengajuan->status) {
-                                            'ACC Final', 'Disahkan' => 'bg-emerald-50 text-emerald-700',
-                                            'Revisi' => 'bg-amber-50 text-amber-700',
-                                            'Ditolak' => 'bg-rose-50 text-rose-700',
+                                            'ACC Final', 'Disahkan', 'disetujui' => 'bg-emerald-50 text-emerald-700',
+                                            'Revisi', 'revisi' => 'bg-amber-50 text-amber-700',
+                                            'Ditolak', 'ditolak' => 'bg-rose-50 text-rose-700',
                                             default => 'bg-sky-50 text-sky-700',
                                         }
                                     }}">
                                         <span class="h-1.5 w-1.5 rounded-full {{
                                             match($pengajuan->status) {
-                                                'ACC Final', 'Disahkan' => 'bg-emerald-500',
-                                                'Revisi' => 'bg-amber-500',
-                                                'Ditolak' => 'bg-rose-500',
+                                                'ACC Final', 'Disahkan', 'disetujui' => 'bg-emerald-500',
+                                                'Revisi', 'revisi' => 'bg-amber-500',
+                                                'Ditolak', 'ditolak' => 'bg-rose-500',
                                                 default => 'bg-sky-500',
                                             }
                                         }}"></span>
@@ -114,49 +114,48 @@
 
                         </div>
 
-                        <!-- SECTION CATATAN / REVISI DARI DOSEN -->
+                        <!-- SECTION TOMBOL SURAT PENGESAHAN (Hanya muncul jika status disetujui) -->
+                        @if(strtolower($pengajuan->status) == 'disetujui')
+                            <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-emerald-800">Judul Telah Disetujui!</h4>
+                                    <p class="text-xs text-emerald-600 mt-0.5">Surat pengesahan resmi dari program studi sudah dapat dicetak.</p>
+                                </div>
+                                <a href="{{ route('mahasiswa.pengajuan.surat', $pengajuan->id) }}" target="_blank" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-2 shrink-0">
+                                    Cetak Surat Pengesahan
+                                </a>
+                            </div>
+                        @endif
+
+                        <!-- SECTION CATATAN / REVISI DARI DOSEN (DARI TABEL CATATAN_REVISI) -->
                         <div class="space-y-4">
                             <h3 class="text-sm font-bold text-slate-900 px-1">
                                 Catatan & Evaluasi Dosen Pembimbing
                             </h3>
 
-                            <!-- Card Komentar Dospem 1 -->
-                            <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700 text-xs">
-                                        {{ $pengajuan->dospem_1_nama ? mb_strtoupper(mb_substr($pengajuan->dospem_1_nama, 0, 2)) : 'D1' }}
+                            @forelse($catatanRevisi as $catatan)
+                                <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700 text-xs">
+                                            {{ mb_strtoupper(mb_substr($catatan->nama_dosen, 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900">{{ $catatan->nama_dosen }}</p>
+                                            <p class="text-[10px] text-slate-400">Dosen Pembimbing</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-900">{{ $pengajuan->dospem_1_nama ?? 'Dosen Pembimbing 1' }}</p>
-                                        <p class="text-[10px] text-slate-400">Dosen Pembimbing 1 (Utama)</p>
-                                    </div>
+                                    <p class="text-xs text-slate-700 leading-relaxed pl-13">
+                                        {{ $catatan->catatan }}
+                                    </p>
+                                    <p class="text-[10px] text-slate-400 pl-13 pt-1">
+                                        {{ \Illuminate\Support\Carbon::parse($catatan->created_at)->format('d M Y • H:i') }}
+                                    </p>
                                 </div>
-                                <p class="text-xs text-slate-700 leading-relaxed pl-13">
-                                    {{ $pengajuan->catatan_dospem_1 ?? 'Belum ada catatan atau evaluasi dari Dosen Pembimbing 1.' }}
-                                </p>
-                                <p class="text-[10px] text-slate-400 pl-13 pt-1">
-                                    {{ \Illuminate\Support\Carbon::parse($pengajuan->updated_at)->format('d M Y • H:i') }}
-                                </p>
-                            </div>
-
-                            <!-- Card Komentar Dospem 2 -->
-                            <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700 text-xs">
-                                        {{ $pengajuan->dospem_2_nama ? mb_strtoupper(mb_substr($pengajuan->dospem_2_nama, 0, 2)) : 'D2' }}
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-900">{{ $pengajuan->dospem_2_nama ?? 'Dosen Pembimbing 2' }}</p>
-                                        <p class="text-[10px] text-slate-400">Dosen Pembimbing 2 (Pendamping)</p>
-                                    </div>
+                            @empty
+                                <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 text-center">
+                                    <p class="text-xs text-slate-400">Belum ada catatan atau evaluasi dari Dosen Pembimbing.</p>
                                 </div>
-                                <p class="text-xs text-slate-700 leading-relaxed pl-13">
-                                    {{ $pengajuan->catatan_dospem_2 ?? 'Belum ada catatan atau evaluasi dari Dosen Pembimbing 2.' }}
-                                </p>
-                                <p class="text-[10px] text-slate-400 pl-13 pt-1">
-                                    {{ \Illuminate\Support\Carbon::parse($pengajuan->updated_at)->format('d M Y • H:i') }}
-                                </p>
-                            </div>
+                            @endforelse
 
                         </div>
 

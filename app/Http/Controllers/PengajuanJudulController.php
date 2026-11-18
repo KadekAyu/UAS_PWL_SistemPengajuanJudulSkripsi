@@ -102,7 +102,7 @@ class PengajuanJudulController extends Controller
         return view('mahasiswa.riwayat', compact('user', 'pengajuan'));
     }
 
-    // MENAMPILKAN HALAMAN DETAIL PENGAJUAN JUDUL
+    // MENAMPILKAN HALAMAN DETAIL PENGAJUAN JUDUL (MENGAMBIL DATA DARI TABEL CATATAN_REVISI)
     public function show($id)
     {
         $user = Auth::user();
@@ -125,7 +125,15 @@ class PengajuanJudulController extends Controller
             abort(404);
         }
 
-        return view('mahasiswa.pengajuan.detail', compact('user', 'pengajuan'));
+        // Mengambil daftar catatan revisi dari tabel catatan_revisi beserta nama dosennya
+        $catatanRevisi = DB::table('catatan_revisi')
+            ->join('users', 'catatan_revisi.dosen_id', '=', 'users.id')
+            ->select('catatan_revisi.*', 'users.name as nama_dosen')
+            ->where('catatan_revisi.pengajuan_id', $id)
+            ->orderBy('catatan_revisi.created_at', 'desc')
+            ->get();
+
+        return view('mahasiswa.pengajuan.detail', compact('user', 'pengajuan', 'catatanRevisi'));
     }
 
     // ==========================================
@@ -199,6 +207,34 @@ class PengajuanJudulController extends Controller
         return redirect()
             ->route('mahasiswa.pengajuan.show', $id)
             ->with('success', 'Revisi pengajuan berhasil dikirim dan menunggu tinjauan dosen.');
+    }
+
+    // ==========================================
+    // FUNGSI CETAK SURAT PENGESAHAN
+    // ==========================================
+
+    public function cetakSurat($id)
+    {
+        $user = Auth::user();
+        abort_unless($user->role === 'mahasiswa', 403);
+
+        $pengajuan = DB::table('pengajuan_judul')
+            ->leftJoin('users as dospem1', 'pengajuan_judul.dospem_1_id', '=', 'dospem1.id')
+            ->leftJoin('users as dospem2', 'pengajuan_judul.dospem_2_id', '=', 'dospem2.id')
+            ->select(
+                'pengajuan_judul.*',
+                'dospem1.name as dospem_1_nama',
+                'dospem2.name as dospem_2_nama'
+            )
+            ->where('pengajuan_judul.id', $id)
+            ->where('pengajuan_judul.mahasiswa_id', $user->id)
+            ->first();
+
+        if (!$pengajuan || $pengajuan->status !== 'disetujui') {
+            abort(403, 'Surat pengesahan belum tersedia.');
+        }
+
+        return view('mahasiswa.pengajuan.surat-pdf', compact('pengajuan', 'user'));
     }
 
     // ==========================================
