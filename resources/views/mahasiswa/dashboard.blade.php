@@ -32,9 +32,6 @@
                 <!-- HEADER -->
                 <header class="mb-6">
 
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                        Dashboard Mahasiswa
-                    </p>
 
                     <h1 class="mt-1 text-xl font-bold tracking-tight text-sky-600">
                         Selamat datang, {{ $user->name }}
@@ -114,23 +111,6 @@
                            class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-xs transition shadow-sm">
                             <span>+ Ajukan Judul Baru</span>
                         </a>
-
-                    </div>
-
-                    <div class="border-t border-slate-100 px-4 py-3">
-
-                        <div class="rounded-lg bg-sky-50 px-4 py-3">
-
-                            <h3 class="text-xs font-semibold text-slate-800">
-                                Informasi Pengajuan
-                            </h3>
-
-                            <p class="mt-1 text-xs leading-5 text-slate-600">
-                                Silakan ajukan judul skripsi beserta abstrak dan proposal.
-                                Perkembangan pengajuan dapat dipantau melalui dashboard ini.
-                            </p>
-
-                        </div>
 
                     </div>
 

@@ -25,8 +25,6 @@
             <x-topbar-mahasiswa>
                 <span>Mahasiswa</span>
                 <span class="text-slate-300">›</span>
-                <a href="{{ route('mahasiswa.riwayat') }}" class="hover:underline">Riwayat Pengajuan</a>
-                <span class="text-slate-300">›</span>
                 <span class="font-semibold text-slate-800">Buat Pengajuan</span>
             </x-topbar-mahasiswa>
 
@@ -216,7 +214,7 @@
                                     <path d="m22 2-7 20-4-9-9-4Z"/>
                                     <path d="M22 2 11 13"/>
                                 </svg>
-                                <span>Kirim Pengajuan</span>
+                                <span>Kirim</span>
                             </button>
                         </div>
                     </div>
