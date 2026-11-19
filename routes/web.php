@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\DospemDashboardController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\KaprodiDashboardController;
 use App\Http\Controllers\PengajuanJudulController;
+use App\Http\Controllers\ProfilController;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 // =====================================
 // HALAMAN UTAMA
@@ -32,7 +33,7 @@ Route::post('/register', function (Request $request) {
         'password' => 'required|string|min:6|confirmed',
     ]);
 
-    $user = User::create([
+    User::create([
         'name'     => $validated['name'],
         'npm'      => $validated['npm'],
         'email'    => $validated['email'],
@@ -40,7 +41,10 @@ Route::post('/register', function (Request $request) {
         'role'     => 'mahasiswa',
     ]);
 
-    return back()->with('success', 'Akun berhasil dibuat! Silakan klik teks login di bawah jika ingin masuk.');
+    return back()->with(
+        'success',
+        'Akun berhasil dibuat! Silakan klik teks login di bawah jika ingin masuk.'
+    );
 });
 
 // =====================================
@@ -84,7 +88,7 @@ Route::get('/dashboard', function () {
 
         'mahasiswa' => redirect()->route('mahasiswa.dashboard'),
 
-        'default' => abort(403, 'Role tidak dikenali.'),
+        default => abort(403, 'Role tidak dikenali.'),
 
     };
 
@@ -100,7 +104,10 @@ Route::middleware('auth')
     ->group(function () {
 
         // DASHBOARD MAHASISWA
-        Route::get('/dashboard', [PengajuanJudulController::class, 'index'])->name('dashboard');
+        Route::get(
+            '/dashboard',
+            [PengajuanJudulController::class, 'index']
+        )->name('dashboard');
 
         // FORM PENGAJUAN JUDUL
         Route::get(
@@ -138,7 +145,7 @@ Route::middleware('auth')
             [PengajuanJudulController::class, 'update']
         )->name('pengajuan.update');
 
-        // CETAK / DOWNLOAD SURAT PENGESAHAN PDF (BARU)
+        // CETAK / DOWNLOAD SURAT PENGESAHAN PDF
         Route::get(
             '/pengajuan/{id}/surat',
             [PengajuanJudulController::class, 'cetakSurat']
@@ -147,8 +154,14 @@ Route::middleware('auth')
         // HALAMAN PROFIL MAHASISWA
         Route::get(
             '/profil',
-            [PengajuanJudulController::class, 'profil']
+            [ProfilController::class, 'index']
         )->name('profil');
+
+        // SIMPAN PERUBAHAN PROFIL MAHASISWA
+        Route::put(
+            '/profil',
+            [ProfilController::class, 'update']
+        )->name('profil.update');
 
     });
 
@@ -161,21 +174,25 @@ Route::middleware('auth')
     ->name('kaprodi.')
     ->group(function () {
 
+        // DASHBOARD KAPRODI
         Route::get(
             '/dashboard',
             [KaprodiDashboardController::class, 'index']
         )->name('dashboard');
 
+        // HALAMAN PENGAJUAN MASUK
         Route::get(
             '/pengajuan',
             [KaprodiDashboardController::class, 'pengajuanMasuk']
         )->name('pengajuan.index');
 
+        // HALAMAN RIWAYAT KEPUTUSAN
         Route::get(
             '/riwayat',
             [KaprodiDashboardController::class, 'riwayatKeputusan']
         )->name('riwayat');
 
+        // PROSES PENGESAHAN
         Route::post(
             '/pengajuan/{pengajuan}/sahkan',
             [KaprodiDashboardController::class, 'sahkan']
@@ -185,55 +202,56 @@ Route::middleware('auth')
 
     });
 
- // =====================================
- // DASHBOARD DOSEN PEMBIMBING
- // =====================================
+// =====================================
+// DASHBOARD DOSEN PEMBIMBING
+// =====================================
 
 Route::middleware('auth')
-        ->prefix('dospem')
-        ->name('dospem.')
-        ->group(function () {
+    ->prefix('dospem')
+    ->name('dospem.')
+    ->group(function () {
 
-            // Dashboard Dosen Pembimbing
-            Route::get(
-                '/dashboard',
-                [DospemDashboardController::class, 'index']
-            )->name('dashboard');
+        // DASHBOARD DOSEN PEMBIMBING
+        Route::get(
+            '/dashboard',
+            [DospemDashboardController::class, 'index']
+        )->name('dashboard');
 
-            // Halaman Pengajuan Masuk
-            Route::get(
-                '/pengajuan',
-                [DospemDashboardController::class, 'pengajuanMasuk']
-            )->name('pengajuan.index');
+        // HALAMAN PENGAJUAN MASUK
+        Route::get(
+            '/pengajuan',
+            [DospemDashboardController::class, 'pengajuanMasuk']
+        )->name('pengajuan.index');
 
-            // Halaman Detail Pengajuan
-            Route::get(
-                '/pengajuan/{id}',
-                [DospemDashboardController::class, 'detail']
-            )
-            ->whereNumber('id')
-            ->name('pengajuan.detail');
+        // HALAMAN DETAIL PENGAJUAN
+        Route::get(
+            '/pengajuan/{id}',
+            [DospemDashboardController::class, 'detail']
+        )
+        ->whereNumber('id')
+        ->name('pengajuan.detail');
 
-            // Lihat File Proposal PDF
-            Route::get(
-                '/pengajuan/{id}/proposal',
-                [DospemDashboardController::class, 'proposal']
-            )
-            ->whereNumber('id')
-            ->name('pengajuan.proposal');
+        // LIHAT FILE PROPOSAL PDF
+        Route::get(
+            '/pengajuan/{id}/proposal',
+            [DospemDashboardController::class, 'proposal']
+        )
+        ->whereNumber('id')
+        ->name('pengajuan.proposal');
 
-            // Halaman Riwayat Review Dospem
-            Route::get(
-                '/riwayat',
-                [DospemDashboardController::class, 'riwayatReview']
-            )->name('riwayat');
-            
-            // Halaman Profil Dosen Pembimbing
-            Route::get(
-                '/profil',
-                [DospemDashboardController::class, 'profil']
-            )->name('profil');
-        });
+        // HALAMAN RIWAYAT REVIEW DOSPEM
+        Route::get(
+            '/riwayat',
+            [DospemDashboardController::class, 'riwayatReview']
+        )->name('riwayat');
+
+        // HALAMAN PROFIL DOSEN PEMBIMBING
+        Route::get(
+            '/profil',
+            [DospemDashboardController::class, 'profil']
+        )->name('profil');
+
+    });
 
 // =====================================
 // LOGOUT

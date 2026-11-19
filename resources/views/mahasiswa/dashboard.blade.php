@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Mahasiswa - SISTA</title>
 
-    <!-- Menggunakan CDN Tailwind agar langsung rapi tanpa build npm -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -22,8 +21,44 @@
         <!-- MAIN CONTENT -->
         <main class="min-w-0 flex-1">
 
+            <!-- TOPBAR -->
             <x-topbar-mahasiswa>
-                <span class="font-semibold text-slate-800">Dashboard Mahasiswa</span>
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
+
+                    <!-- ICON HOME -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-4 w-4 text-slate-400"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="m3 10 9-7 9 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 9v11h14V9"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9 20v-6h6v6"/>
+                    </svg>
+
+                    <span class="text-slate-400">Mahasiswa</span>
+
+                    <!-- SEPARATOR -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-3 w-3 text-slate-400"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="2">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                    <span class="font-semibold text-slate-800">
+                        Dashboard
+                    </span>
+
+                </div>
             </x-topbar-mahasiswa>
 
             <!-- PAGE CONTENT -->
@@ -32,8 +67,13 @@
                 <!-- HEADER -->
                 <header class="mb-6">
 
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="text-[10px] font-bold tracking-wider text-sky-600">
+                            DASHBOARD MAHASISWA
+                        </span>
+                    </div>
 
-                    <h1 class="mt-1 text-xl font-bold tracking-tight text-sky-600">
+                    <h1 class="text-xl font-bold tracking-tight text-slate-800">
                         Selamat datang, {{ $user->name }}
                     </h1>
 
@@ -61,17 +101,62 @@
                 <section class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
                     @foreach ([
-                        ['label' => 'Total Pengajuan', 'value' => $statistics['total'], 'tone' => 'sky'],
-                        ['label' => 'Menunggu Proses', 'value' => $statistics['pending'], 'tone' => 'amber'],
-                        ['label' => 'Perlu Revisi', 'value' => $statistics['revisi'], 'tone' => 'orange'],
-                        ['label' => 'Ditolak', 'value' => $statistics['ditolak'], 'tone' => 'rose'],
+                        [
+                            'label' => 'Total Pengajuan',
+                            'value' => $statistics['total'],
+                            'tone' => 'sky',
+                            'icon' => 'document'
+                        ],
+                        [
+                            'label' => 'Menunggu Proses',
+                            'value' => $statistics['pending'],
+                            'tone' => 'amber',
+                            'icon' => 'clock'
+                        ],
+                        [
+                            'label' => 'Perlu Revisi',
+                            'value' => $statistics['revisi'],
+                            'tone' => 'orange',
+                            'icon' => 'edit'
+                        ],
+                        [
+                            'label' => 'Ditolak',
+                            'value' => $statistics['ditolak'],
+                            'tone' => 'rose',
+                            'icon' => 'x'
+                        ],
                     ] as $card)
 
-                        <article class="rounded-xl border border-sky-100 bg-white px-4 py-3 shadow-sm">
+                        <article class="rounded-xl border border-sky-100 bg-white px-4 py-3 shadow-sm transition hover:shadow-md">
 
-                            <p class="text-xs text-slate-500">
-                                {{ $card['label'] }}
-                            </p>
+                            <div class="flex items-center justify-between">
+
+                                <p class="text-xs text-slate-500">
+                                    {{ $card['label'] }}
+                                </p>
+
+                                @if ($card['icon'] === 'document')
+                                    <svg class="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 3.75h7l5 5V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 3.75v5h5M9 13h6M9 16.5h6"/>
+                                    </svg>
+                                @elseif ($card['icon'] === 'clock')
+                                    <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
+                                    </svg>
+                                @elseif ($card['icon'] === 'edit')
+                                    <svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/>
+                                    </svg>
+                                @else
+                                    <svg class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 6 6m0-6-6 6"/>
+                                    </svg>
+                                @endif
+
+                            </div>
 
                             <p class="mt-1 text-xl font-bold text-slate-900">
                                 {{ $card['value'] }}
@@ -97,19 +182,44 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
 
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-900">
-                                Pengajuan Judul Skripsi
-                            </h2>
+                        <div class="flex items-start gap-3">
 
-                            <p class="mt-1 text-xs text-slate-500">
-                                Ajukan judul dan proposal skripsi untuk mendapatkan persetujuan.
-                            </p>
+                            <div class="rounded-lg bg-sky-50 p-2">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="h-5 w-5 text-sky-600"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke="currentColor"
+                                     stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900">
+                                    Pengajuan Judul Skripsi
+                                </h2>
+
+                                <p class="mt-1 text-xs text-slate-500">
+                                    Ajukan judul dan proposal skripsi untuk mendapatkan persetujuan.
+                                </p>
+                            </div>
+
                         </div>
 
                         <a href="{{ route('mahasiswa.pengajuan.create') }}"
-                           class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-xs transition shadow-sm">
-                            <span>+ Ajukan Judul Baru</span>
+                           class="flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600">
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-4 w-4"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
+                            </svg>
+
+                            Ajukan Judul Baru
                         </a>
 
                     </div>
@@ -119,15 +229,29 @@
                 <!-- RIWAYAT PENGAJUAN -->
                 <section id="riwayat" class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
-                    <div class="border-b border-slate-100 px-4 py-3">
+                    <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
 
-                        <h2 class="text-sm font-bold text-slate-900">
-                            Riwayat Pengajuan
-                        </h2>
+                        <div class="rounded-lg bg-sky-50 p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-5 w-5 text-sky-600"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-2a9 9 0 1 1-2.64-6.36"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 3v6h-6"/>
+                            </svg>
+                        </div>
 
-                        <p class="mt-1 text-xs text-slate-500">
-                            Daftar pengajuan judul skripsi yang pernah Anda ajukan.
-                        </p>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">
+                                Riwayat Pengajuan
+                            </h2>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Daftar pengajuan judul skripsi yang pernah Anda ajukan.
+                            </p>
+                        </div>
 
                     </div>
 
@@ -166,7 +290,7 @@
 
                                     @foreach ($pengajuan as $item)
 
-                                        <tr>
+                                        <tr class="transition hover:bg-sky-50/50">
 
                                             <td class="px-5 py-3 text-slate-600">
                                                 {{ $loop->iteration }}

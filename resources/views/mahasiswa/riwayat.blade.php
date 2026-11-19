@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pengajuan - SISTA</title>
 
-    <!-- Menggunakan CDN Tailwind langsung agar rapi dan aman -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -22,107 +21,306 @@
         <!-- MAIN CONTENT -->
         <main class="min-w-0 flex-1">
 
+            <!-- TOPBAR -->
             <x-topbar-mahasiswa>
-                <span>Mahasiswa</span>
-                <span class="text-slate-300">›</span>
-                <span class="font-semibold text-slate-800">Riwayat Pengajuan</span>
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
+
+                    <!-- ICON HOME -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-4 w-4 text-slate-400"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="m3 10 9-7 9 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 9v11h14V9"/>
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9 20v-6h6v6"/>
+                    </svg>
+
+                    <span class="text-slate-400">Mahasiswa</span>
+
+                    <!-- SEPARATOR -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-3 w-3 text-slate-400"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="2">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="m9 18 6-6-6-6"/>
+                    </svg>
+
+                    <span class="font-semibold text-slate-800">
+                        Riwayat Pengajuan
+                    </span>
+
+                </div>
             </x-topbar-mahasiswa>
 
             <!-- PAGE CONTENT -->
-            <div class="p-8">
+            <div class="p-6">
 
-                <header class="mb-6">
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">
-                        Riwayat pengajuan
+                <!-- HEADER -->
+                <header class="mb-5">
+
+                    <h1 class="text-xl font-bold tracking-tight text-slate-800">
+                        Riwayat Pengajuan
                     </h1>
 
                     <p class="mt-1 text-xs text-slate-500">
                         Daftar berkas dan pengajuan judul yang pernah dikirim.
                     </p>
+
                 </header>
 
-                <!-- TABEL RIWAYAT / DAFTAR PENGAJUAN -->
-                <section class="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm">
+                <!-- PESAN BERHASIL -->
+                @if (session('success'))
+                    <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
-                    <div class="border-b border-slate-100 px-6 py-4">
-                        <h2 class="text-sm font-bold text-slate-900">
-                            Daftar pengajuan
-                        </h2>
+                <!-- PESAN ERROR -->
+                @if ($errors->any())
+                    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <!-- DAFTAR PENGAJUAN -->
+                <section class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
+
+                    <!-- CARD HEADER -->
+                    <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+
+                        <div class="rounded-lg bg-sky-50 p-2">
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-5 w-5 text-sky-600"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="1.8">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      d="M7 3.75h7l5 5V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Z"/>
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      d="M14 3.75v5h5M9 13h6M9 16.5h6"/>
+                            </svg>
+
+                        </div>
+
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">
+                                Daftar Pengajuan
+                            </h2>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Informasi status dan berkas pengajuan judul skripsi.
+                            </p>
+                        </div>
+
                     </div>
 
                     @if ($pengajuan->isEmpty())
-                        <div class="px-6 py-10 text-center">
-                            <p class="text-xs font-semibold text-slate-700">Belum Ada Pengajuan</p>
-                            <p class="mt-1 text-xs text-slate-400">Berkas dan judul yang Anda ajukan akan muncul di sini.</p>
+
+                        <!-- EMPTY STATE -->
+                        <div class="px-5 py-10 text-center">
+
+                            <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-sky-50">
+
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="h-5 w-5 text-sky-500"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke="currentColor"
+                                     stroke-width="1.7">
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M7 3.75h7l5 5V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Z"/>
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M14 3.75v5h5M9 13h6"/>
+                                </svg>
+
+                            </div>
+
+                            <h3 class="text-xs font-semibold text-slate-700">
+                                Belum Ada Pengajuan
+                            </h3>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Berkas dan judul yang Anda ajukan akan muncul di sini.
+                            </p>
+
                         </div>
+
                     @else
+
+                        <!-- TABLE -->
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs whitespace-nowrap">
-                                <thead class="bg-slate-50/75 text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
+
+                            <table class="w-full min-w-[700px] text-left text-xs">
+
+                                <thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500">
+
                                     <tr>
-                                        <th class="px-6 py-3.5 font-semibold text-left">Judul</th>
-                                        <th class="px-6 py-3.5 font-semibold text-left">Tanggal</th>
-                                        <th class="px-6 py-3.5 font-semibold text-left">Status</th>
-                                        <th class="px-6 py-3.5 font-semibold text-left">Berkas PDF</th>
-                                        <th class="px-6 py-3.5 font-semibold text-left">Aksi</th>
+
+                                        <th class="w-12 px-5 py-3 font-semibold">
+                                            No
+                                        </th>
+
+                                        <th class="px-5 py-3 font-semibold">
+                                            Judul Skripsi
+                                        </th>
+
+                                        <th class="w-32 px-5 py-3 font-semibold">
+                                            Tanggal
+                                        </th>
+
+                                        <th class="w-36 px-5 py-3 font-semibold">
+                                            Status
+                                        </th>
+
+                                        <th class="w-44 px-5 py-3 font-semibold">
+                                            Berkas PDF
+                                        </th>
+
+                                        <th class="w-28 px-5 py-3 font-semibold">
+                                            Aksi
+                                        </th>
+
                                     </tr>
+
                                 </thead>
 
                                 <tbody class="divide-y divide-slate-100">
+
                                     @foreach ($pengajuan as $item)
-                                        <tr class="hover:bg-slate-50/50 transition">
-                                            
+
+                                        <tr class="transition hover:bg-sky-50/50">
+
+                                            <!-- NOMOR -->
+                                            <td class="px-5 py-3.5 text-slate-500">
+                                                {{ $loop->iteration }}
+                                            </td>
+
                                             <!-- JUDUL -->
-                                            <td class="px-6 py-4 font-medium text-slate-800 max-w-xs md:max-w-md whitespace-normal leading-relaxed text-left">
+                                            <td class="max-w-md px-5 py-3.5 font-medium leading-relaxed text-slate-700">
                                                 {{ $item->judul }}
                                             </td>
 
                                             <!-- TANGGAL -->
-                                            <td class="px-6 py-4 text-slate-500 text-left">
+                                            <td class="whitespace-nowrap px-5 py-3.5 text-slate-600">
                                                 {{ \Illuminate\Support\Carbon::parse($item->created_at)->format('d M Y') }}
                                             </td>
 
                                             <!-- STATUS -->
-                                            <td class="px-6 py-4 text-left">
-                                                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium {{
+                                            <td class="whitespace-nowrap px-5 py-3.5">
+
+                                                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold {{
                                                     match($item->status) {
                                                         'ACC Final', 'Disahkan' => 'bg-emerald-50 text-emerald-700',
-                                                        'Revisi' => 'bg-amber-50 text-amber-700',
+                                                        'Revisi' => 'bg-orange-50 text-orange-700',
                                                         'Ditolak' => 'bg-rose-50 text-rose-700',
-                                                        default => 'bg-sky-50 text-sky-700',
+                                                        'ACC Dospem', 'ACC Dosen' => 'bg-sky-50 text-sky-700',
+                                                        default => 'bg-amber-50 text-amber-700',
                                                     }
                                                 }}">
+
                                                     <span class="h-1.5 w-1.5 rounded-full {{
                                                         match($item->status) {
                                                             'ACC Final', 'Disahkan' => 'bg-emerald-500',
-                                                            'Revisi' => 'bg-amber-500',
+                                                            'Revisi' => 'bg-orange-500',
                                                             'Ditolak' => 'bg-rose-500',
-                                                            default => 'bg-sky-500',
+                                                            'ACC Dospem', 'ACC Dosen' => 'bg-sky-500',
+                                                            default => 'bg-amber-500',
                                                         }
                                                     }}"></span>
-                                                    {{ ucfirst($item->status) }}
+
+                                                    {{ $item->status }}
+
                                                 </span>
+
                                             </td>
 
                                             <!-- BERKAS PDF -->
-                                            <td class="px-6 py-4 text-sky-600 font-medium max-w-[200px] truncate text-left">
-                                                <a href="{{ asset('storage/' . $item->file_proposal) }}" target="_blank" class="hover:underline block truncate" title="{{ Str::after(basename($item->file_proposal), '_') }}">
-                                                    {{ Str::after(basename($item->file_proposal), '_') }}
+                                            <td class="max-w-[180px] px-5 py-3.5">
+
+                                                <a href="{{ asset('storage/' . $item->file_proposal) }}"
+                                                   target="_blank"
+                                                   class="flex max-w-[180px] items-center gap-2 text-xs font-medium text-sky-600 transition hover:text-sky-700 hover:underline"
+                                                   title="{{ basename($item->file_proposal) }}">
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="h-4 w-4 shrink-0 text-rose-500"
+                                                         fill="none"
+                                                         viewBox="0 0 24 24"
+                                                         stroke="currentColor"
+                                                         stroke-width="1.8">
+                                                        <path stroke-linecap="round"
+                                                              stroke-linejoin="round"
+                                                              d="M7 3.75h7l5 5V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Z"/>
+                                                        <path stroke-linecap="round"
+                                                              stroke-linejoin="round"
+                                                              d="M14 3.75v5h5"/>
+                                                    </svg>
+
+                                                    <span class="truncate">
+                                                        {{ Str::after(basename($item->file_proposal), '_') }}
+                                                    </span>
+
                                                 </a>
+
                                             </td>
 
-                                            <!-- AKSI (Rata Kiri) -->
-                                            <td class="px-6 py-4 text-left">
-                                                <a href="{{ route('mahasiswa.pengajuan.show', $item->id) }}" class="text-sky-600 hover:text-sky-700 font-semibold inline-block">
+                                            <!-- AKSI -->
+                                            <td class="whitespace-nowrap px-5 py-3.5">
+
+                                                <a href="{{ route('mahasiswa.pengajuan.show', $item->id) }}"
+                                                   class="inline-flex items-center gap-1.5 rounded-lg border border-sky-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-sky-600 transition hover:bg-sky-50">
+
                                                     Lihat Detail
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="h-3 w-3"
+                                                         fill="none"
+                                                         viewBox="0 0 24 24"
+                                                         stroke="currentColor"
+                                                         stroke-width="2">
+                                                        <path stroke-linecap="round"
+                                                              stroke-linejoin="round"
+                                                              d="m9 18 6-6-6-6"/>
+                                                    </svg>
+
                                                 </a>
+
                                             </td>
 
                                         </tr>
+
                                     @endforeach
+
                                 </tbody>
+
                             </table>
+
                         </div>
+
+                        <!-- TABLE FOOTER -->
+                        <div class="border-t border-slate-100 bg-white px-5 py-3">
+
+                            <p class="text-[10px] text-slate-400">
+                                Menampilkan {{ $pengajuan->count() }} pengajuan.
+                            </p>
+
+                        </div>
+
                     @endif
 
                 </section>
