@@ -166,6 +166,11 @@ Route::middleware('auth')
             [KaprodiDashboardController::class, 'index']
         )->name('dashboard');
 
+        Route::get(
+            '/pengajuan',
+            [KaprodiDashboardController::class, 'pengajuanMasuk']
+        )->name('pengajuan.index');
+
         Route::post(
             '/pengajuan/{pengajuan}/sahkan',
             [KaprodiDashboardController::class, 'sahkan']

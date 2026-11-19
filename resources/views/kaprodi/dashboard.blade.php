@@ -40,7 +40,7 @@
                     Dashboard
                 </a>
 
-                <a href="#antrean"
+                <a href="{{ route('kaprodi.pengajuan.index') }}"
                    class="whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
                     Pengajuan Masuk
                 </a>

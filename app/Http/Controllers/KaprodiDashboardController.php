@@ -9,6 +9,37 @@ use Illuminate\View\View;
 
 class KaprodiDashboardController extends Controller
 {
+    public function pengajuanMasuk(Request $request): View
+    {
+        abort_unless($request->user()->role === 'kaprodi', 403);
+
+        $approvalStatuses = ['ACC Dospem', 'ACC Dosen', 'Menunggu Persetujuan Kaprodi'];
+
+        $pengajuanMasuk = DB::table('pengajuan_judul as pengajuan')
+            ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
+            ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
+            ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
+            ->whereIn('pengajuan.status', $approvalStatuses)
+            ->select([
+                'pengajuan.id',
+                'pengajuan.judul',
+                'pengajuan.abstrak',
+                'pengajuan.file_proposal',
+                'pengajuan.status',
+                'pengajuan.created_at',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'dospem_1.id as dospem_1_id',
+                'dospem_1.name as nama_dospem_1',
+                'dospem_2.id as dospem_2_id',
+                'dospem_2.name as nama_dospem_2',
+            ])
+            ->latest('pengajuan.updated_at')
+            ->get();
+
+        return view('kaprodi.pengajuan.index', compact('pengajuanMasuk'));
+    }
+
     public function index(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
