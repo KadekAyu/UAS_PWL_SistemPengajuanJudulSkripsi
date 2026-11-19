@@ -41,7 +41,7 @@
                 Pengajuan Masuk
             </a>
 
-            <a href="{{ route('kaprodi.dashboard') }}#riwayat"
+            <a href="{{ route('kaprodi.riwayat') }}"
                class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
                 <i data-lucide="clock-3" class="h-5 w-5"></i>
                 Riwayat Keputusan

@@ -40,6 +40,60 @@ class KaprodiDashboardController extends Controller
         return view('kaprodi.pengajuan.index', compact('pengajuanMasuk'));
     }
 
+    public function riwayatKeputusan(Request $request): View
+    {
+        abort_unless($request->user()->role === 'kaprodi', 403);
+
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:ACC Final,Ditolak'],
+        ]);
+
+        $baseQuery = DB::table('pengajuan_judul as pengajuan')
+            ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
+            ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
+            ->leftJoin('users as dospem_final', 'dospem_final.id', '=', 'pengajuan.dospem_final_id')
+            ->whereIn('pengajuan.status', ['ACC Final', 'Ditolak']);
+
+        if (!empty($validated['q'])) {
+            $keyword = $validated['q'];
+
+            $baseQuery->where(function ($query) use ($keyword): void {
+                $query->where('mahasiswa.name', 'like', '%' . $keyword . '%')
+                    ->orWhere('mahasiswa.npm', 'like', '%' . $keyword . '%')
+                    ->orWhere('pengajuan.judul', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        if (!empty($validated['status'])) {
+            $baseQuery->where('pengajuan.status', $validated['status']);
+        }
+
+        $riwayat = $baseQuery
+            ->select([
+                'pengajuan.id',
+                'pengajuan.judul',
+                'pengajuan.status',
+                'pengajuan.updated_at',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'surat.nomor_sk',
+                'surat.tanggal_disetujui',
+                'dospem_final.name as nama_dospem_final',
+            ])
+            ->latest('pengajuan.updated_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        $statistics = [
+            'total' => DB::table('pengajuan_judul')->whereIn('status', ['ACC Final', 'Ditolak'])->count(),
+            'disahkan' => DB::table('pengajuan_judul')->where('status', 'ACC Final')->count(),
+            'ditolak' => DB::table('pengajuan_judul')->where('status', 'Ditolak')->count(),
+        ];
+
+        return view('kaprodi.riwayat', compact('riwayat', 'statistics'));
+    }
+
     public function index(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
