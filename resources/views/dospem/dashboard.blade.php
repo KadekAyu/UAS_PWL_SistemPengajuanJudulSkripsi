@@ -50,13 +50,13 @@
                     Pengajuan Masuk
                 </a>
 
-                <a href="#riwayat"
+                <a href="{{ route('dospem.riwayat') }}"
                    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
-                    <i data-lucide="clock-3" class="h-5 w-5"></i>
-                    Riwayat Review
+                   <i data-lucide="clock-3" class="h-5 w-5"></i>
+                   Riwayat Review
                 </a>
 
-                <a href="#profil"
+                <a href="{{ route('dospem.profil') }}"
                    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
                     <i data-lucide="circle-user-round" class="h-5 w-5"></i>
                     Profil
