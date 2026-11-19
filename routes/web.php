@@ -175,28 +175,55 @@ Route::middleware('auth')
 
     });
 
-// =====================================
-// DASHBOARD DOSEN PEMBIMBING
-// =====================================
+ // =====================================
+ // DASHBOARD DOSEN PEMBIMBING
+ // =====================================
 
 Route::middleware('auth')
-    ->prefix('dospem')
-    ->name('dospem.')
-    ->group(function () {
+        ->prefix('dospem')
+        ->name('dospem.')
+        ->group(function () {
 
-        // Dashboard Dosen Pembimbing
-        Route::get(
-            '/dashboard',
-            [DospemDashboardController::class, 'index']
-        )->name('dashboard');
+            // Dashboard Dosen Pembimbing
+            Route::get(
+                '/dashboard',
+                [DospemDashboardController::class, 'index']
+            )->name('dashboard');
 
-        // Halaman Pengajuan Masuk
-        Route::get(
-            '/pengajuan',
-            [DospemDashboardController::class, 'pengajuanMasuk']
-        )->name('pengajuan.index');
+            // Halaman Pengajuan Masuk
+            Route::get(
+                '/pengajuan',
+                [DospemDashboardController::class, 'pengajuanMasuk']
+            )->name('pengajuan.index');
 
-    });
+            // Halaman Detail Pengajuan
+            Route::get(
+                '/pengajuan/{id}',
+                [DospemDashboardController::class, 'detail']
+            )
+            ->whereNumber('id')
+            ->name('pengajuan.detail');
+
+            // Lihat File Proposal PDF
+            Route::get(
+                '/pengajuan/{id}/proposal',
+                [DospemDashboardController::class, 'proposal']
+            )
+            ->whereNumber('id')
+            ->name('pengajuan.proposal');
+
+            // Halaman Riwayat Review Dospem
+            Route::get(
+                '/riwayat',
+                [DospemDashboardController::class, 'riwayatReview']
+            )->name('riwayat');
+            
+            // Halaman Profil Dosen Pembimbing
+            Route::get(
+                '/profil',
+                [DospemDashboardController::class, 'profil']
+            )->name('profil');
+        });
 
 // =====================================
 // LOGOUT

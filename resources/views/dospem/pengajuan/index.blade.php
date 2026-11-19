@@ -51,13 +51,13 @@
                 Pengajuan Masuk
             </a>
 
-            <a href="{{ route('dospem.dashboard') }}#riwayat"
+            <a href="{{ route('dospem.riwayat') }}"
                class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
                 <i data-lucide="clock-3" class="h-5 w-5"></i>
                 Riwayat Review
             </a>
 
-            <a href="{{ route('dospem.dashboard') }}#profil"
+            <a href="{{ route('dospem.profil') }}"
                class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
                 <i data-lucide="circle-user-round" class="h-5 w-5"></i>
                 Profil
@@ -201,15 +201,14 @@
                                                 </span>
                                             </td>
 
-                                            <!-- TOMBOL DETAIL: TAMPIL SAJA, FITUR BELUM AKTIF -->
+                                            <!-- TOMBOL DETAIL: SUDAH AKTIF -->
                                             <td class="px-4 py-3">
-                                                <button type="button"
-                                                        disabled
-                                                        title="Fitur Detail Pengajuan akan tersedia pada tahap berikutnya"
-                                                        class="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-sky-100 px-3 py-2 text-xs font-semibold text-sky-700 opacity-70">
-                                                    <i data-lucide="eye" class="h-4 w-4"></i>
-                                                    Detail
-                                                </button>
+                                                <a href="{{ route('dospem.pengajuan.detail', $item->id) }}"
+                                                   class="inline-flex items-center gap-2 rounded-lg bg-sky-100 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-200 hover:text-sky-900">
+
+                                                   <i data-lucide="eye" class="h-4 w-4"></i>
+                                                   Detail
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
