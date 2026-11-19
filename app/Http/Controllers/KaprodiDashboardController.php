@@ -9,6 +9,91 @@ use Illuminate\View\View;
 
 class KaprodiDashboardController extends Controller
 {
+    public function pengajuanMasuk(Request $request): View
+    {
+        abort_unless($request->user()->role === 'kaprodi', 403);
+
+        $approvalStatuses = ['ACC Dospem', 'ACC Dosen', 'Menunggu Persetujuan Kaprodi'];
+
+        $pengajuanMasuk = DB::table('pengajuan_judul as pengajuan')
+            ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
+            ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
+            ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
+            ->whereIn('pengajuan.status', $approvalStatuses)
+            ->select([
+                'pengajuan.id',
+                'pengajuan.judul',
+                'pengajuan.abstrak',
+                'pengajuan.file_proposal',
+                'pengajuan.status',
+                'pengajuan.created_at',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'dospem_1.id as dospem_1_id',
+                'dospem_1.name as nama_dospem_1',
+                'dospem_2.id as dospem_2_id',
+                'dospem_2.name as nama_dospem_2',
+            ])
+            ->latest('pengajuan.updated_at')
+            ->get();
+
+        return view('kaprodi.pengajuan.index', compact('pengajuanMasuk'));
+    }
+
+    public function riwayatKeputusan(Request $request): View
+    {
+        abort_unless($request->user()->role === 'kaprodi', 403);
+
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:ACC Final,Ditolak'],
+        ]);
+
+        $baseQuery = DB::table('pengajuan_judul as pengajuan')
+            ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
+            ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
+            ->leftJoin('users as dospem_final', 'dospem_final.id', '=', 'pengajuan.dospem_final_id')
+            ->whereIn('pengajuan.status', ['ACC Final', 'Ditolak']);
+
+        if (!empty($validated['q'])) {
+            $keyword = $validated['q'];
+
+            $baseQuery->where(function ($query) use ($keyword): void {
+                $query->where('mahasiswa.name', 'like', '%' . $keyword . '%')
+                    ->orWhere('mahasiswa.npm', 'like', '%' . $keyword . '%')
+                    ->orWhere('pengajuan.judul', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        if (!empty($validated['status'])) {
+            $baseQuery->where('pengajuan.status', $validated['status']);
+        }
+
+        $riwayat = $baseQuery
+            ->select([
+                'pengajuan.id',
+                'pengajuan.judul',
+                'pengajuan.status',
+                'pengajuan.updated_at',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'surat.nomor_sk',
+                'surat.tanggal_disetujui',
+                'dospem_final.name as nama_dospem_final',
+            ])
+            ->latest('pengajuan.updated_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        $statistics = [
+            'total' => DB::table('pengajuan_judul')->whereIn('status', ['ACC Final', 'Ditolak'])->count(),
+            'disahkan' => DB::table('pengajuan_judul')->where('status', 'ACC Final')->count(),
+            'ditolak' => DB::table('pengajuan_judul')->where('status', 'Ditolak')->count(),
+        ];
+
+        return view('kaprodi.riwayat', compact('riwayat', 'statistics'));
+    }
+
     public function index(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
