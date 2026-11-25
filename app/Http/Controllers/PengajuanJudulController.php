@@ -6,10 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use App\Models\User;
 
 class PengajuanJudulController extends Controller
 {
+    private const DOSEN_ROLES = [
+        'dosen',
+        'dospem',
+        'dosen_pembimbing',
+    ];
+
     // MENAMPILKAN DASHBOARD MAHASISWA & RIWAYAT PENGAJUAN
     public function index()
     {
@@ -29,24 +36,31 @@ class PengajuanJudulController extends Controller
             'ditolak' => $pengajuan->where('status', 'ditolak')->count(),
         ];
 
-        return view('mahasiswa.dashboard', compact('user', 'pengajuan', 'statistics'));
+        return view('mahasiswa.dashboard', compact(
+            'user',
+            'pengajuan',
+            'statistics'
+        ));
     }
 
+    // MENAMPILKAN FORM PENGAJUAN JUDUL
     public function create()
     {
         $user = Auth::user();
 
         abort_unless($user->role === 'mahasiswa', 403);
 
-        $dosenList = User::whereIn('role', [
-            'dosen',
-            'dospem',
-            'dosen_pembimbing',
-        ])->orderBy('name')->get();
+        $dosenList = User::whereIn('role', self::DOSEN_ROLES)
+            ->orderBy('name')
+            ->get();
 
-        return view('mahasiswa.pengajuan.create', compact('dosenList'));
+        return view('mahasiswa.pengajuan.create', compact(
+            'user',
+            'dosenList'
+        ));
     }
 
+    // MENYIMPAN PENGAJUAN JUDUL BARU
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -56,28 +70,36 @@ class PengajuanJudulController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'abstrak' => 'required|string',
-            'dospem_1_id' => 'required|different:dospem_2_id|exists:users,id',
-            'dospem_2_id' => 'required|exists:users,id',
-            'file_proposal' => 'required|file|mimes:pdf|max:5120',
-            // Validasi tambahan agar nilai status string varchar konsisten
-            'status' => 'nullable|string|in:menunggu,revisi,disetujui,ditolak',
-        ]);
 
-        $dospem1 = User::findOrFail($validated['dospem_1_id']);
-        $dospem2 = User::findOrFail($validated['dospem_2_id']);
+            'dospem_1_id' => [
+                'required',
+                'different:dospem_2_id',
+                Rule::exists('users', 'id')->whereIn('role', self::DOSEN_ROLES),
+            ],
+
+            'dospem_2_id' => [
+                'required',
+                'different:dospem_1_id',
+                Rule::exists('users', 'id')->whereIn('role', self::DOSEN_ROLES),
+            ],
+
+            'file_proposal' => 'required|file|mimes:pdf|max:5120',
+        ]);
 
         $originalName = $request->file('file_proposal')->getClientOriginalName();
         $fileName = time() . '_' . $originalName;
-        $file = $request->file('file_proposal')->storeAs('proposal', $fileName, 'public');
+
+        $file = $request->file('file_proposal')
+            ->storeAs('proposal', $fileName, 'public');
 
         DB::table('pengajuan_judul')->insert([
             'mahasiswa_id' => $user->id,
             'judul' => $validated['judul'],
             'abstrak' => $validated['abstrak'],
             'file_proposal' => $file,
-            'dospem_1_id' => $dospem1->id,
-            'dospem_2_id' => $dospem2->id,
-            'status' => $validated['status'] ?? 'menunggu',
+            'dospem_1_id' => $validated['dospem_1_id'],
+            'dospem_2_id' => $validated['dospem_2_id'],
+            'status' => 'menunggu',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -99,10 +121,13 @@ class PengajuanJudulController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('mahasiswa.riwayat', compact('user', 'pengajuan'));
+        return view('mahasiswa.riwayat', compact(
+            'user',
+            'pengajuan'
+        ));
     }
 
-    // MENAMPILKAN HALAMAN DETAIL PENGAJUAN JUDUL (MENGAMBIL DATA DARI TABEL CATATAN_REVISI)
+    // MENAMPILKAN DETAIL PENGAJUAN JUDUL
     public function show($id)
     {
         $user = Auth::user();
@@ -110,8 +135,18 @@ class PengajuanJudulController extends Controller
         abort_unless($user->role === 'mahasiswa', 403);
 
         $pengajuan = DB::table('pengajuan_judul')
-            ->leftJoin('users as dospem1', 'pengajuan_judul.dospem_1_id', '=', 'dospem1.id')
-            ->leftJoin('users as dospem2', 'pengajuan_judul.dospem_2_id', '=', 'dospem2.id')
+            ->leftJoin(
+                'users as dospem1',
+                'pengajuan_judul.dospem_1_id',
+                '=',
+                'dospem1.id'
+            )
+            ->leftJoin(
+                'users as dospem2',
+                'pengajuan_judul.dospem_2_id',
+                '=',
+                'dospem2.id'
+            )
             ->select(
                 'pengajuan_judul.*',
                 'dospem1.name as dospem_1_nama',
@@ -125,48 +160,78 @@ class PengajuanJudulController extends Controller
             abort(404);
         }
 
-        // Mengambil daftar catatan revisi dari tabel catatan_revisi beserta nama dosennya
         $catatanRevisi = DB::table('catatan_revisi')
-            ->join('users', 'catatan_revisi.dosen_id', '=', 'users.id')
-            ->select('catatan_revisi.*', 'users.name as nama_dosen')
+            ->join(
+                'users',
+                'catatan_revisi.dosen_id',
+                '=',
+                'users.id'
+            )
+            ->select(
+                'catatan_revisi.*',
+                'users.name as nama_dosen'
+            )
             ->where('catatan_revisi.pengajuan_id', $id)
             ->orderBy('catatan_revisi.created_at', 'desc')
             ->get();
 
-        return view('mahasiswa.pengajuan.detail', compact('user', 'pengajuan', 'catatanRevisi'));
+        return view('mahasiswa.pengajuan.detail', compact(
+            'user',
+            'pengajuan',
+            'catatanRevisi'
+        ));
     }
 
-    // ==========================================
-    // FUNGSI EDIT & UPDATE REVISI
-    // ==========================================
-
+    // MENAMPILKAN FORM EDIT / REVISI PENGAJUAN
     public function edit($id)
     {
         $user = Auth::user();
+
         abort_unless($user->role === 'mahasiswa', 403);
 
         $pengajuan = DB::table('pengajuan_judul')
-            ->leftJoin('users as dospem1', 'pengajuan_judul.dospem_1_id', '=', 'dospem1.id')
-            ->leftJoin('users as dospem2', 'pengajuan_judul.dospem_2_id', '=', 'dospem2.id')
+            ->leftJoin(
+                'users as dospem1',
+                'pengajuan_judul.dospem_1_id',
+                '=',
+                'dospem1.id'
+            )
+            ->leftJoin(
+                'users as dospem2',
+                'pengajuan_judul.dospem_2_id',
+                '=',
+                'dospem2.id'
+            )
             ->select(
                 'pengajuan_judul.*',
                 'dospem1.name as dospem_1_nama',
                 'dospem2.name as dospem_2_nama'
             )
             ->where('pengajuan_judul.id', $id)
-            ->where('mahasiswa_id', $user->id)
+            ->where('pengajuan_judul.mahasiswa_id', $user->id)
             ->first();
 
         if (!$pengajuan || $pengajuan->status !== 'revisi') {
             abort(403, 'Pengajuan tidak dapat direvisi.');
         }
 
-        return view('mahasiswa.pengajuan.edit', compact('user', 'pengajuan'));
+        // Mengambil daftar dosen untuk pilihan Dospem 1 dan 2
+        $daftarDosen = User::whereIn('role', self::DOSEN_ROLES)
+            ->orderBy('name')
+            ->get();
+
+        return view('mahasiswa.pengajuan.edit', compact(
+            'user',
+            'pengajuan',
+            'daftarDosen'
+        ));
     }
 
+    // MENYIMPAN PERUBAHAN / REVISI PENGAJUAN
     public function update(Request $request, $id)
     {
         $user = Auth::user();
+
         abort_unless($user->role === 'mahasiswa', 403);
 
         $pengajuan = DB::table('pengajuan_judul')
@@ -175,52 +240,86 @@ class PengajuanJudulController extends Controller
             ->first();
 
         if (!$pengajuan || $pengajuan->status !== 'revisi') {
-            abort(403);
+            abort(403, 'Pengajuan tidak dapat diperbarui.');
         }
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'abstrak' => 'required|string',
+
+            'dospem_1_id' => [
+                'required',
+                'different:dospem_2_id',
+                Rule::exists('users', 'id')->whereIn('role', self::DOSEN_ROLES),
+            ],
+
+            'dospem_2_id' => [
+                'required',
+                'different:dospem_1_id',
+                Rule::exists('users', 'id')->whereIn('role', self::DOSEN_ROLES),
+            ],
+
             'file_proposal' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
+        // Menggunakan file lama jika mahasiswa tidak mengunggah file baru
         $filePath = $pengajuan->file_proposal;
 
         if ($request->hasFile('file_proposal')) {
-            if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $originalName = $request->file('file_proposal')->getClientOriginalName();
+            $fileName = time() . '_' . $originalName;
+
+            $newFilePath = $request->file('file_proposal')
+                ->storeAs('proposal', $fileName, 'public');
+
+            // Hapus file lama setelah file baru berhasil disimpan
+            if ($newFilePath && $filePath && Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
             }
 
-            $originalName = $request->file('file_proposal')->getClientOriginalName();
-            $fileName = time() . '_' . $originalName;
-            $filePath = $request->file('file_proposal')->storeAs('proposal', $fileName, 'public');
+            $filePath = $newFilePath;
         }
 
-        DB::table('pengajuan_judul')->where('id', $id)->update([
-            'judul' => $validated['judul'],
-            'abstrak' => $validated['abstrak'],
-            'file_proposal' => $filePath,
-            'status' => 'menunggu',
-            'updated_at' => now(),
-        ]);
+        DB::table('pengajuan_judul')
+            ->where('id', $id)
+            ->update([
+                'judul' => $validated['judul'],
+                'abstrak' => $validated['abstrak'],
+                'file_proposal' => $filePath,
+                'dospem_1_id' => $validated['dospem_1_id'],
+                'dospem_2_id' => $validated['dospem_2_id'],
+                'status' => 'menunggu',
+                'updated_at' => now(),
+            ]);
 
         return redirect()
             ->route('mahasiswa.pengajuan.show', $id)
-            ->with('success', 'Revisi pengajuan berhasil dikirim dan menunggu tinjauan dosen.');
+            ->with(
+                'success',
+                'Revisi pengajuan berhasil dikirim dan menunggu tinjauan dosen.'
+            );
     }
 
-    // ==========================================
-    // FUNGSI CETAK SURAT PENGESAHAN
-    // ==========================================
-
+    // CETAK SURAT PENGESAHAN
     public function cetakSurat($id)
     {
         $user = Auth::user();
+
         abort_unless($user->role === 'mahasiswa', 403);
 
         $pengajuan = DB::table('pengajuan_judul')
-            ->leftJoin('users as dospem1', 'pengajuan_judul.dospem_1_id', '=', 'dospem1.id')
-            ->leftJoin('users as dospem2', 'pengajuan_judul.dospem_2_id', '=', 'dospem2.id')
+            ->leftJoin(
+                'users as dospem1',
+                'pengajuan_judul.dospem_1_id',
+                '=',
+                'dospem1.id'
+            )
+            ->leftJoin(
+                'users as dospem2',
+                'pengajuan_judul.dospem_2_id',
+                '=',
+                'dospem2.id'
+            )
             ->select(
                 'pengajuan_judul.*',
                 'dospem1.name as dospem_1_nama',
@@ -234,16 +333,17 @@ class PengajuanJudulController extends Controller
             abort(403, 'Surat pengesahan belum tersedia.');
         }
 
-        return view('mahasiswa.pengajuan.surat-pdf', compact('pengajuan', 'user'));
+        return view('mahasiswa.pengajuan.surat-pdf', compact(
+            'pengajuan',
+            'user'
+        ));
     }
 
-    // ==========================================
-    // FUNGSI PROFIL MAHASISWA
-    // ==========================================
-
+    // MENAMPILKAN PROFIL MAHASISWA
     public function profil()
     {
         $user = Auth::user();
+
         abort_unless($user->role === 'mahasiswa', 403);
 
         return view('mahasiswa.profil', compact('user'));

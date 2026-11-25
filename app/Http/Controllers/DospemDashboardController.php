@@ -2,90 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class DospemDashboardController extends Controller
 {
-    // =====================================
-    // DASHBOARD DOSEN PEMBIMBING
-    // =====================================
     public function index()
     {
         $user = Auth::user();
 
         abort_unless($user && $user->role === 'dospem', 403);
 
-        // Ambil seluruh pengajuan yang memilih dosen ini.
         $pengajuan = DB::table('pengajuan_judul as p')
-            ->join('users as m', 'p.mahasiswa_id', '=', 'm.id')
+            ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
+            ->leftJoin('users as dospem1', 'p.dospem_1_id', '=', 'dospem1.id')
+            ->leftJoin('users as dospem2', 'p.dospem_2_id', '=', 'dospem2.id')
             ->where(function ($query) use ($user) {
                 $query->where('p.dospem_1_id', $user->id)
-                      ->orWhere('p.dospem_2_id', $user->id);
+                    ->orWhere('p.dospem_2_id', $user->id);
             })
             ->select(
                 'p.*',
-                'm.name as nama_mahasiswa',
-                'm.npm as npm_mahasiswa'
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'dospem1.name as nama_dospem_1',
+                'dospem2.name as nama_dospem_2'
             )
-            ->orderByDesc('p.created_at')
+            ->latest('p.created_at')
             ->get();
 
-        // Membantu pengecekan status tanpa membedakan huruf besar/kecil.
-        $statusAdalah = function ($item, array $pilihan) {
-            return in_array(
-                strtolower(trim($item->status ?? '')),
-                $pilihan,
-                true
-            );
-        };
+        $totalPengajuan = $pengajuan->count();
 
-        // Pengajuan yang masih menunggu pemeriksaan.
-        $pengajuanMasuk = $pengajuan
-            ->filter(fn ($item) =>
-                $statusAdalah($item, ['menunggu', 'pending'])
-            )
-            ->values();
+        $pengajuanMenunggu = $pengajuan->whereIn('status', [
+            'Menunggu',
+            'Pending',
+            'Menunggu Persetujuan Dospem',
+        ])->count();
 
-        // Riwayat review per dosen belum diimplementasikan.
-        // Tidak menggunakan status global sebagai bukti review dosen.
+        $pengajuanDisetujui = $pengajuan->whereIn('status', [
+            'ACC Dospem',
+            'ACC Dosen',
+            'Menunggu Persetujuan Kaprodi',
+            'ACC Final',
+        ])->count();
+
+        $pengajuanDitolak = $pengajuan->where('status', 'Ditolak')->count();
+
+        $pengajuanMasuk = $pengajuan->whereIn('status', [
+            'Menunggu',
+            'Pending',
+            'Menunggu Persetujuan Dospem',
+        ]);
+
         $riwayat = collect();
-
-        // Statistik dashboard.
-        $statistics = [
-            'total' => $pengajuan->count(),
-
-            'pending' => $pengajuanMasuk->count(),
-
-            'disetujui' => $pengajuan
-                ->filter(fn ($item) =>
-                    $statusAdalah($item, ['acc', 'disetujui'])
-                )->count(),
-
-            'revisi' => $pengajuan
-                ->filter(fn ($item) =>
-                    $statusAdalah($item, ['revisi'])
-                )->count(),
-
-            'ditolak' => $pengajuan
-                ->filter(fn ($item) =>
-                    $statusAdalah($item, ['ditolak'])
-                )->count(),
-        ];
 
         return view('dospem.dashboard', compact(
             'user',
             'pengajuan',
+            'totalPengajuan',
+            'pengajuanMenunggu',
+            'pengajuanDisetujui',
+            'pengajuanDitolak',
             'pengajuanMasuk',
-            'riwayat',
-            'statistics'
+            'riwayat'
         ));
     }
 
-    // =====================================
-    // HALAMAN PENGAJUAN MASUK
-    // =====================================
     public function pengajuanMasuk()
     {
         $user = Auth::user();
@@ -93,23 +77,26 @@ class DospemDashboardController extends Controller
         abort_unless($user && $user->role === 'dospem', 403);
 
         $pengajuanMasuk = DB::table('pengajuan_judul as p')
-            ->join('users as m', 'p.mahasiswa_id', '=', 'm.id')
+            ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
+            ->leftJoin('users as dospem1', 'p.dospem_1_id', '=', 'dospem1.id')
+            ->leftJoin('users as dospem2', 'p.dospem_2_id', '=', 'dospem2.id')
             ->where(function ($query) use ($user) {
                 $query->where('p.dospem_1_id', $user->id)
-                      ->orWhere('p.dospem_2_id', $user->id);
+                    ->orWhere('p.dospem_2_id', $user->id);
             })
             ->whereIn('p.status', [
-                'menunggu',
                 'Menunggu',
-                'pending',
-                'Pending'
+                'Pending',
+                'Menunggu Persetujuan Dospem',
             ])
             ->select(
                 'p.*',
-                'm.name as nama_mahasiswa',
-                'm.npm as npm_mahasiswa'
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'dospem1.name as nama_dospem_1',
+                'dospem2.name as nama_dospem_2'
             )
-            ->orderByDesc('p.created_at')
+            ->latest('p.created_at')
             ->get();
 
         return view('dospem.pengajuan.index', compact(
@@ -118,44 +105,35 @@ class DospemDashboardController extends Controller
         ));
     }
 
-    // =====================================
-    // HALAMAN DETAIL PENGAJUAN
-    // =====================================
     public function detail($id)
     {
         $user = Auth::user();
 
         abort_unless($user && $user->role === 'dospem', 403);
 
-        // Hanya dapat melihat pengajuan yang memilih
-        // dosen login sebagai Dospem 1 atau Dospem 2.
         $pengajuan = DB::table('pengajuan_judul as p')
-            ->join('users as m', 'p.mahasiswa_id', '=', 'm.id')
-            ->leftJoin('users as d1', 'p.dospem_1_id', '=', 'd1.id')
-            ->leftJoin('users as d2', 'p.dospem_2_id', '=', 'd2.id')
+            ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
+            ->leftJoin('users as dospem1', 'p.dospem_1_id', '=', 'dospem1.id')
+            ->leftJoin('users as dospem2', 'p.dospem_2_id', '=', 'dospem2.id')
             ->where('p.id', $id)
             ->where(function ($query) use ($user) {
                 $query->where('p.dospem_1_id', $user->id)
-                      ->orWhere('p.dospem_2_id', $user->id);
+                    ->orWhere('p.dospem_2_id', $user->id);
             })
             ->select(
                 'p.*',
-                'm.name as nama_mahasiswa',
-                'm.npm as npm_mahasiswa',
-                'm.email as email_mahasiswa',
-                'd1.name as nama_dospem_1',
-                'd2.name as nama_dospem_2'
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'mahasiswa.email',
+                'dospem1.name as nama_dospem_1',
+                'dospem2.name as nama_dospem_2'
             )
             ->first();
 
-        // Pengajuan tidak ditemukan atau bukan milik dosen login.
         abort_unless($pengajuan, 404);
 
-        // Cek ketersediaan PDF di penyimpanan project baru.
-        $proposalTersedia = !empty($pengajuan->file_proposal)
-            && Storage::disk('public')->exists(
-                $pengajuan->file_proposal
-            );
+        $proposalTersedia = $pengajuan->file_proposal
+            && Storage::disk('public')->exists($pengajuan->file_proposal);
 
         return view('dospem.pengajuan.detail', compact(
             'user',
@@ -164,65 +142,145 @@ class DospemDashboardController extends Controller
         ));
     }
 
-    // =====================================
-    // MELIHAT PROPOSAL PDF
-    // =====================================
+    public function review(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        abort_unless($user && $user->role === 'dospem', 403);
+
+        $validated = $request->validate([
+            'status' => 'required|in:ACC,Revisi,Ditolak',
+            'catatan' => [
+                'nullable',
+                'string',
+                'required_if:status,Revisi,Ditolak',
+            ],
+        ], [
+            'status.required' => 'Silakan pilih keputusan review.',
+            'status.in' => 'Keputusan review tidak valid.',
+            'catatan.required_if' => 'Catatan wajib diisi untuk keputusan revisi atau penolakan.',
+            'catatan.string' => 'Catatan review harus berupa teks.',
+        ]);
+
+        $pengajuan = DB::table('pengajuan_judul')
+            ->where('id', $id)
+            ->where(function ($query) use ($user) {
+                $query->where('dospem_1_id', $user->id)
+                    ->orWhere('dospem_2_id', $user->id);
+            })
+            ->first();
+
+        abort_unless($pengajuan, 404);
+
+        DB::table('catatan_revisi')->updateOrInsert(
+            [
+                'pengajuan_id' => $id,
+                'dosen_id' => $user->id,
+            ],
+            [
+                'catatan' => $validated['catatan'] ?? null,
+                'status' => $validated['status'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        return redirect()
+            ->route('dospem.pengajuan.detail', $id)
+            ->with('success', 'Catatan dan keputusan review berhasil dikirim kepada mahasiswa.');
+    }
+
     public function proposal($id)
     {
         $user = Auth::user();
 
         abort_unless($user && $user->role === 'dospem', 403);
 
-        // Pastikan pengajuan memang ditujukan kepada dosen login.
         $pengajuan = DB::table('pengajuan_judul')
             ->where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->where('dospem_1_id', $user->id)
-                      ->orWhere('dospem_2_id', $user->id);
+                    ->orWhere('dospem_2_id', $user->id);
             })
             ->first();
 
         abort_unless($pengajuan, 404);
 
-        $path = $pengajuan->file_proposal;
+        $proposalPath = $pengajuan->file_proposal;
 
         abort_unless(
-            $path && Storage::disk('public')->exists($path),
-            404,
-            'File proposal tidak ditemukan.'
+            $proposalPath && Storage::disk('public')->exists($proposalPath),
+            404
         );
 
-        return Storage::disk('public')->response(
-            $path,
-            'Proposal-Pengajuan-' . $pengajuan->id . '.pdf',
-            ['Content-Type' => 'application/pdf']
+        return response()->file(
+            Storage::disk('public')->path($proposalPath),
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="Proposal-Pengajuan-' . $pengajuan->id . '.pdf"',
+            ]
         );
     }
 
-    // =====================================
-    // HALAMAN RIWAYAT REVIEW DOSPEM
-    // =====================================
     public function riwayatReview()
     {
         $user = Auth::user();
 
-        // Hanya Dosen Pembimbing yang dapat mengakses.
         abort_unless($user && $user->role === 'dospem', 403);
 
-        // Backend penyimpanan keputusan review belum dibuat.
-        // Untuk tahap UI, tampilkan daftar kosong terlebih dahulu.
-        $riwayat = collect();
+        $riwayat = DB::table('catatan_revisi as cr')
+            ->join('pengajuan_judul as p', 'cr.pengajuan_id', '=', 'p.id')
+            ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
+            ->where('cr.dosen_id', $user->id)
+            ->select(
+                'cr.*',
+                'p.judul',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm'
+            )
+            ->latest('cr.updated_at')
+            ->get();
 
-        return view('dospem.riwayat', compact(
+        return view('dospem.riwayat', compact('user', 'riwayat'));
+    }
+
+    public function mahasiswaBimbingan()
+    {
+        $user = Auth::user();
+
+        abort_unless($user && $user->role === 'dospem', 403);
+
+        $mahasiswaBimbingan = DB::table('pengajuan_judul as p')
+            ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
+            ->leftJoin('surat_pengesahan as sp', 'p.id', '=', 'sp.pengajuan_id')
+            ->where(function ($query) use ($user) {
+                $query->where('p.dospem_1_id', $user->id)
+                    ->orWhere('p.dospem_2_id', $user->id);
+            })
+            ->where('p.status', 'ACC Final')
+            ->select(
+                'p.*',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'mahasiswa.email',
+                'sp.nomor_sk'
+            )
+            ->latest('p.updated_at')
+            ->get()
+            ->map(function ($item) use ($user) {
+                $item->posisi_dospem = $item->dospem_1_id == $user->id
+                    ? 'Dosen Pembimbing 1'
+                    : 'Dosen Pembimbing 2';
+
+                return $item;
+            });
+
+        return view('dospem.mahasiswa-bimbingan', compact(
             'user',
-            'riwayat'
+            'mahasiswaBimbingan'
         ));
     }
 
-    
-    // =====================================
-    // HALAMAN PROFIL DOSEN PEMBIMBING
-    // =====================================
     public function profil()
     {
         $user = Auth::user();
@@ -231,5 +289,4 @@ class DospemDashboardController extends Controller
 
         return view('dospem.profil', compact('user'));
     }
-
 }

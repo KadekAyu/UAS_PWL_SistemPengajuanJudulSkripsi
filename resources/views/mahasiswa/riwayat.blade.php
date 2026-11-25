@@ -9,7 +9,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pengajuan - SISTA</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
 </head>
 
 <body class="min-h-screen bg-[#E8F5FF] text-slate-800">
@@ -32,11 +36,14 @@
                          viewBox="0 0 24 24"
                          stroke="currentColor"
                          stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round"
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
                               d="m3 10 9-7 9 7"/>
-                        <path stroke-linecap="round" stroke-linejoin="round"
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
                               d="M5 9v11h14V9"/>
-                        <path stroke-linecap="round" stroke-linejoin="round"
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
                               d="M9 20v-6h6v6"/>
                     </svg>
 
@@ -62,7 +69,7 @@
             </x-topbar-mahasiswa>
 
             <!-- PAGE CONTENT -->
-            <div class="p-6">
+            <div class="p-4 md:p-6">
 
                 <!-- HEADER -->
                 <header class="mb-5">
@@ -99,18 +106,18 @@
 
                         <div class="rounded-lg bg-sky-50 p-2">
 
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="h-5 w-5 text-sky-600"
+                            <!-- ICON RIWAYAT -->
+                            <svg class="h-5 w-5 text-sky-600"
                                  fill="none"
                                  viewBox="0 0 24 24"
                                  stroke="currentColor"
                                  stroke-width="1.8">
                                 <path stroke-linecap="round"
                                       stroke-linejoin="round"
-                                      d="M7 3.75h7l5 5V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Z"/>
+                                      d="M12 8v4l3 2m6-2a9 9 0 1 1-2.64-6.36"/>
                                 <path stroke-linecap="round"
                                       stroke-linejoin="round"
-                                      d="M14 3.75v5h5M9 13h6M9 16.5h6"/>
+                                      d="M21 3v6h-6"/>
                             </svg>
 
                         </div>
@@ -120,9 +127,6 @@
                                 Daftar Pengajuan
                             </h2>
 
-                            <p class="mt-1 text-xs text-slate-500">
-                                Informasi status dan berkas pengajuan judul skripsi.
-                            </p>
                         </div>
 
                     </div>

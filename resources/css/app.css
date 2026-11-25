@@ -481,3 +481,459 @@ textarea.input-sista {
     border-color: #ef4444 !important;
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.10) !important;
 }
+
+
+/* =====================================
+   DETAIL PENGAJUAN DOSEN PEMBIMBING
+===================================== */
+
+.detail-content {
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 2px 16px 22px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+.detail-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    height: 100%;
+}
+
+.detail-card {
+    min-width: 0;
+    padding: 13px;
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+/* IDENTITAS MAHASISWA */
+
+.identity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.identity-item {
+    min-width: 0;
+    padding: 3px 12px;
+    border-right: 1px solid #e2e8f0;
+}
+
+.identity-item:first-child {
+    padding-left: 0;
+}
+
+.identity-item:last-child {
+    padding-right: 0;
+    border-right: none;
+}
+
+/* INFORMASI SKRIPSI */
+
+.skripsi-card {
+    padding: 12px 14px;
+}
+
+.skripsi-card .section-heading {
+    margin-bottom: 10px;
+}
+
+.skripsi-card .section-icon {
+    width: 29px;
+    height: 29px;
+}
+
+.skripsi-card .info-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
+.skripsi-title {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.skripsi-abstract {
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.skripsi-divider {
+    margin-top: 9px;
+    padding-top: 9px;
+}
+
+/* HEADING */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.section-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: #eff8ff;
+    color: #0284c7;
+}
+
+.section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* INFORMASI */
+
+.info-label {
+    margin-bottom: 5px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.info-value {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* FILE PROPOSAL */
+
+.proposal-detail {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px;
+    border: 1px solid #e0f2fe;
+    background: #f0f9ff;
+    border-radius: 9px;
+}
+
+.proposal-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: #fff1f2;
+    color: #e11d48;
+    text-align: center;
+}
+
+.proposal-icon i,
+.proposal-icon svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+}
+
+.proposal-icon span {
+    display: block;
+    margin: 0;
+    padding: 0;
+    color: #e11d48;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 11px;
+    letter-spacing: 0.4px;
+}
+
+.proposal-filename {
+    color: #334155;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.proposal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.proposal-meta span {
+    padding: 3px 6px;
+    color: #64748b;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    font-size: 9px;
+}
+
+/* REVIEW PENGAJUAN */
+
+.review-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.review-card .section-heading {
+    margin-bottom: 15px;
+}
+
+.review-card form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.review-textarea {
+    display: block;
+    width: 100%;
+    min-height: 145px;
+    padding: 11px 12px;
+    resize: vertical;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 12px;
+    line-height: 1.6;
+    outline: none;
+    transition: 0.2s;
+}
+
+.review-textarea:focus {
+    border-color: #38bdf8;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px #e0f2fe;
+}
+
+/* KEPUTUSAN REVIEW */
+
+.decision-area {
+    margin-top: auto;
+    padding-top: 30px;
+}
+
+.decision-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.decision-button {
+    display: flex;
+    min-height: 58px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 4px;
+    border-radius: 9px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.decision-button:active {
+    transform: scale(0.98);
+}
+
+/* NOTIFIKASI CUSTOM */
+
+.custom-toast {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 9999;
+    display: flex;
+    width: min(360px, calc(100vw - 32px));
+    align-items: flex-start;
+    gap: 11px;
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.13);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    transition: 0.25s ease;
+}
+
+.custom-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.toast-icon {
+    display: flex;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.toast-title {
+    color: #9f1239;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.toast-message {
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.toast-close {
+    margin-left: auto;
+    padding: 2px;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+/* DESKTOP */
+
+@media (min-width: 851px) {
+    main {
+        display: flex;
+        min-width: 0;
+        min-height: 100vh;
+        flex-direction: column;
+    }
+
+    .detail-content {
+        flex: 1;
+    }
+
+    .detail-header {
+        margin-bottom: 8px !important;
+    }
+}
+
+/* TABLET */
+
+@media (max-width: 1100px) and (min-width: 851px) {
+    .detail-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+    }
+
+    .detail-card {
+        padding: 12px;
+    }
+
+    .decision-area {
+        padding-top: 24px;
+    }
+}
+
+/* TABLET DAN MOBILE */
+
+@media (max-width: 850px) {
+    main {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .detail-content {
+        height: auto;
+        padding: 14px 16px 24px;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-grid > div {
+        height: auto;
+    }
+
+    .review-card {
+        flex: none;
+    }
+
+    .review-card form {
+        flex: none;
+    }
+
+    .review-textarea {
+        min-height: 110px;
+    }
+
+    .decision-area {
+        margin-top: 0;
+        padding-top: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .identity-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .identity-item,
+    .identity-item:first-child,
+    .identity-item:last-child {
+        padding: 10px 0;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .identity-item:first-child {
+        padding-top: 3px;
+    }
+
+    .identity-item:last-child {
+        padding-bottom: 3px;
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-card {
+        padding: 13px;
+    }
+
+    .decision-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .decision-button {
+        min-height: 42px;
+        flex-direction: row;
+    }
+
+    .custom-toast {
+        top: 12px;
+        right: 12px;
+    }
+}

@@ -1,5 +1,12 @@
 @php
     $user = auth()->user();
+
+    $jumlahAcc = $pengajuan->whereIn('status', [
+        'ACC Dospem',
+        'ACC Dosen',
+        'ACC Final',
+        'Disahkan',
+    ])->count();
 @endphp
 
 <!DOCTYPE html>
@@ -9,13 +16,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Mahasiswa - SISTA</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
 </head>
 
 <body class="min-h-screen bg-[#E8F5FF] text-slate-800">
 
     <div class="min-h-screen md:flex">
 
+        <!-- SIDEBAR MAHASISWA -->
         <x-sidebar-mahasiswa />
 
         <!-- MAIN CONTENT -->
@@ -32,12 +44,9 @@
                          viewBox="0 0 24 24"
                          stroke="currentColor"
                          stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="m3 10 9-7 9 7"/>
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M5 9v11h14V9"/>
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M9 20v-6h6v6"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m3 10 9-7 9 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 9v11h14V9"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20v-6h6v6"/>
                     </svg>
 
                     <span class="text-slate-400">Mahasiswa</span>
@@ -49,9 +58,7 @@
                          viewBox="0 0 24 24"
                          stroke="currentColor"
                          stroke-width="2">
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m9 18 6-6-6-6"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/>
                     </svg>
 
                     <span class="font-semibold text-slate-800">
@@ -62,10 +69,10 @@
             </x-topbar-mahasiswa>
 
             <!-- PAGE CONTENT -->
-            <div class="p-6">
+            <div class="p-4 md:p-6">
 
                 <!-- HEADER -->
-                <header class="mb-6">
+                <header class="mb-5">
 
                     <div class="mb-2 flex items-center gap-2">
                         <span class="text-[10px] font-bold tracking-wider text-sky-600">
@@ -85,14 +92,14 @@
 
                 <!-- PESAN BERHASIL -->
                 @if (session('success'))
-                    <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
+                    <div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 <!-- PESAN ERROR -->
                 @if ($errors->any())
-                    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+                    <div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
                         {{ $errors->first() }}
                     </div>
                 @endif
@@ -101,30 +108,10 @@
                 <section class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
                     @foreach ([
-                        [
-                            'label' => 'Total Pengajuan',
-                            'value' => $statistics['total'],
-                            'tone' => 'sky',
-                            'icon' => 'document'
-                        ],
-                        [
-                            'label' => 'Menunggu Proses',
-                            'value' => $statistics['pending'],
-                            'tone' => 'amber',
-                            'icon' => 'clock'
-                        ],
-                        [
-                            'label' => 'Perlu Revisi',
-                            'value' => $statistics['revisi'],
-                            'tone' => 'orange',
-                            'icon' => 'edit'
-                        ],
-                        [
-                            'label' => 'Ditolak',
-                            'value' => $statistics['ditolak'],
-                            'tone' => 'rose',
-                            'icon' => 'x'
-                        ],
+                        ['label' => 'Total Pengajuan', 'value' => $statistics['total'] ?? 0, 'tone' => 'sky', 'icon' => 'document'],
+                        ['label' => 'Menunggu Proses', 'value' => $statistics['pending'] ?? 0, 'tone' => 'amber', 'icon' => 'clock'],
+                        ['label' => 'Sudah ACC', 'value' => $jumlahAcc, 'tone' => 'emerald', 'icon' => 'check'],
+                        ['label' => 'Revisi / Ditolak', 'value' => ($statistics['revisi'] ?? 0) + ($statistics['ditolak'] ?? 0), 'tone' => 'rose', 'icon' => 'x'],
                     ] as $card)
 
                         <article class="rounded-xl border border-sky-100 bg-white px-4 py-3 shadow-sm transition hover:shadow-md">
@@ -145,9 +132,9 @@
                                         <circle cx="12" cy="12" r="9"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/>
                                     </svg>
-                                @elseif ($card['icon'] === 'edit')
-                                    <svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/>
+                                @elseif ($card['icon'] === 'check')
+                                    <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/>
                                     </svg>
                                 @else
                                     <svg class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -166,7 +153,7 @@
                                 [
                                     'sky' => 'bg-sky-400',
                                     'amber' => 'bg-amber-400',
-                                    'orange' => 'bg-orange-400',
+                                    'emerald' => 'bg-emerald-500',
                                     'rose' => 'bg-rose-400',
                                 ][$card['tone']]
                             }}"></div>
@@ -180,64 +167,44 @@
                 <!-- PENGAJUAN JUDUL -->
                 <section class="mb-4 overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
-                    <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
 
-                        <div class="flex items-start gap-3">
+                        <div class="rounded-lg bg-sky-50 p-2">
+                            <svg class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
+                            </svg>
+                        </div>
 
-                            <div class="rounded-lg bg-sky-50 p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="h-5 w-5 text-sky-600"
-                                     fill="none"
-                                     viewBox="0 0 24 24"
-                                     stroke="currentColor"
-                                     stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
-                                </svg>
-                            </div>
-
-                            <div>
-                                <h2 class="text-sm font-bold text-slate-900">
-                                    Pengajuan Judul Skripsi
-                                </h2>
-
-                                <p class="mt-1 text-xs text-slate-500">
-                                    Ajukan judul dan proposal skripsi untuk mendapatkan persetujuan.
-                                </p>
-                            </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">
+                                Pengajuan Judul Skripsi
+                            </h2>
 
                         </div>
 
-                        <a href="{{ route('mahasiswa.pengajuan.create') }}"
-                           class="flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600">
+                        <div class="ml-auto">
+                            <a href="{{ route('mahasiswa.pengajuan.create') }}"
+                               class="flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600">
 
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="h-4 w-4"
-                                 fill="none"
-                                 viewBox="0 0 24 24"
-                                 stroke="currentColor"
-                                 stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
-                            </svg>
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
+                                </svg>
 
-                            Ajukan Judul Baru
-                        </a>
+                                Ajukan Judul Baru
+                            </a>
+                        </div>
 
                     </div>
 
                 </section>
 
                 <!-- RIWAYAT PENGAJUAN -->
-                <section id="riwayat" class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
+                <section class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
                     <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
 
                         <div class="rounded-lg bg-sky-50 p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="h-5 w-5 text-sky-600"
-                                 fill="none"
-                                 viewBox="0 0 24 24"
-                                 stroke="currentColor"
-                                 stroke-width="1.8">
+                            <svg class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-2a9 9 0 1 1-2.64-6.36"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 3v6h-6"/>
                             </svg>
@@ -248,28 +215,11 @@
                                 Riwayat Pengajuan
                             </h2>
 
-                            <p class="mt-1 text-xs text-slate-500">
-                                Daftar pengajuan judul skripsi yang pernah Anda ajukan.
-                            </p>
                         </div>
 
                     </div>
 
-                    @if ($pengajuan->isEmpty())
-
-                        <div class="px-5 py-7 text-center">
-
-                            <h3 class="text-xs font-semibold text-slate-700">
-                                Belum Ada Pengajuan
-                            </h3>
-
-                            <p class="mt-1 text-xs text-slate-500">
-                                Pengajuan judul skripsi Anda akan ditampilkan di sini.
-                            </p>
-
-                        </div>
-
-                    @else
+                    @if ($pengajuan->isNotEmpty())
 
                         <div class="overflow-x-auto">
 
@@ -327,6 +277,20 @@
                                 </tbody>
 
                             </table>
+
+                        </div>
+
+                    @else
+
+                        <div class="px-5 py-7 text-center">
+
+                            <h3 class="text-xs font-semibold text-slate-700">
+                                Belum Ada Pengajuan
+                            </h3>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Pengajuan judul skripsi Anda akan ditampilkan di sini.
+                            </p>
 
                         </div>
 

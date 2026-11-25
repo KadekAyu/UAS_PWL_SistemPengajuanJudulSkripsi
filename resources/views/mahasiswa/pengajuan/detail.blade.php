@@ -1,5 +1,22 @@
 @php
     $user = auth()->user();
+    $status = strtolower(trim($pengajuan->status));
+
+    $statusClass = match($status) {
+        'acc final', 'disahkan', 'disetujui' => 'bg-emerald-50 text-emerald-700',
+        'revisi' => 'bg-orange-50 text-orange-700',
+        'ditolak' => 'bg-rose-50 text-rose-700',
+        'acc dospem', 'acc dosen' => 'bg-sky-50 text-sky-700',
+        default => 'bg-amber-50 text-amber-700',
+    };
+
+    $statusDot = match($status) {
+        'acc final', 'disahkan', 'disetujui' => 'bg-emerald-500',
+        'revisi' => 'bg-orange-500',
+        'ditolak' => 'bg-rose-500',
+        'acc dospem', 'acc dosen' => 'bg-sky-500',
+        default => 'bg-amber-500',
+    };
 @endphp
 
 <!DOCTYPE html>
@@ -9,204 +26,307 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Pengajuan - SISTA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .page-layout {
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .main-content {
+                min-height: 0;
+                overflow-y: auto;
+            }
+        }
+
+        .catatan-scroll {
+            max-height: 260px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: #bae6fd #f8fafc;
+        }
+
+        .catatan-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .catatan-scroll::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+
+        .catatan-scroll::-webkit-scrollbar-thumb {
+            background: #bae6fd;
+            border-radius: 10px;
+        }
+
+        .catatan-scroll::-webkit-scrollbar-thumb:hover {
+            background: #7dd3fc;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-[#E8F5FF] text-slate-800">
 
-    <div class="min-h-screen md:flex">
+    <div class="page-layout min-h-screen md:flex">
 
-        <!-- Sidebar Mahasiswa -->
         <x-sidebar-mahasiswa />
 
-        <!-- MAIN CONTENT -->
-        <main class="min-w-0 flex-1">
+        <main class="main-content min-w-0 flex-1">
 
-            <!-- Topbar Terpusat -->
             <x-topbar-mahasiswa>
-                <span>Mahasiswa</span>
-                <span class="text-slate-300">›</span>
-                <a href="{{ route('mahasiswa.riwayat') }}" class="hover:underline">Riwayat Pengajuan</a>
-                <span class="text-slate-300">›</span>
-                <span class="font-semibold text-slate-800">Detail Pengajuan</span>
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
+                    <span class="text-slate-400">Mahasiswa</span>
+                    <span class="text-slate-300">›</span>
+                    <a href="{{ route('mahasiswa.riwayat') }}" class="hover:underline">
+                        Riwayat Pengajuan
+                    </a>
+                    <span class="text-slate-300">›</span>
+                    <span class="font-semibold text-slate-800">Detail Pengajuan</span>
+                </div>
             </x-topbar-mahasiswa>
 
-            <!-- PAGE CONTENT CONTAINER -->
-            <div class="p-8 max-w-5xl mx-auto space-y-6">
+            <div class="mx-auto max-w-6xl space-y-4 p-4 md:p-5">
 
-                <!-- HEADER & BREADCRUMB/STATUS INFO -->
-                <div class="flex flex-wrap items-center justify-between gap-4">
+                <!-- HEADER -->
+                <header class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-semibold text-sky-600 tracking-wide uppercase">Pengajuan Aktif</span>
-                        </div>
-                        <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                        <h1 class="text-xl font-bold tracking-tight text-slate-800">
                             Detail Pengajuan
                         </h1>
+                        <p class="mt-1 text-xs text-slate-500">
+                            Informasi lengkap pengajuan judul skripsi Anda.
+                        </p>
                     </div>
 
-                    <div class="flex items-center gap-3">
-                        <!-- TOMBOL REVISI (Hanya muncul jika status 'revisi') -->
-                        @if(strtolower($pengajuan->status) === 'revisi')
-                            <a href="{{ route('mahasiswa.pengajuan.edit', $pengajuan->id) }}" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-2">
-                                ✎ Revisi Pengajuan
-                            </a>
-                        @endif
+                    @if ($status === 'revisi')
+                        <a href="{{ route('mahasiswa.pengajuan.edit', $pengajuan->id) }}"
+                           class="inline-flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-semibold text-orange-700 transition hover:bg-orange-100">
+                            Revisi Pengajuan
+                        </a>
+                    @endif
+                </header>
 
+                @if (session('success'))
+                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-800">
+                        {{ session('success') }}
                     </div>
-                </div>
+                @endif
 
-                <!-- MAIN INFO GRID -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                @if ($errors->any())
+                    <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-xs text-red-700">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
 
-                    <!-- KOLOM KIRI / UTAMA (2 Kolom di LG): Judul & Abstrak -->
-                    <div class="lg:col-span-2 space-y-6">
+                <!-- INFORMASI PENGAJUAN -->
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
 
-                        <!-- CARD INFORMASI UTAMA -->
-                        <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-6 space-y-5">
-                            
-                            <!-- Status Badge -->
-                            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <!-- KOLOM UTAMA -->
+                    <div class="space-y-4 lg:col-span-2">
+
+                        <!-- DETAIL JUDUL -->
+                        <section class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm">
+
+                            <!-- STATUS DAN TANGGAL -->
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-slate-400 block mb-1">Status Saat Ini</span>
-                                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium {{
-                                        match($pengajuan->status) {
-                                            'ACC Final', 'Disahkan', 'disetujui' => 'bg-emerald-50 text-emerald-700',
-                                            'Revisi', 'revisi' => 'bg-amber-50 text-amber-700',
-                                            'Ditolak', 'ditolak' => 'bg-rose-50 text-rose-700',
-                                            default => 'bg-sky-50 text-sky-700',
-                                        }
-                                    }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{
-                                            match($pengajuan->status) {
-                                                'ACC Final', 'Disahkan', 'disetujui' => 'bg-emerald-500',
-                                                'Revisi', 'revisi' => 'bg-amber-500',
-                                                'Ditolak', 'ditolak' => 'bg-rose-500',
-                                                default => 'bg-sky-500',
-                                            }
-                                        }}"></span>
-                                        {{ ucfirst($pengajuan->status) }}
+                                    <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                        Status Saat Ini
+                                    </p>
+
+                                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold {{ $statusClass }}">
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $statusDot }}"></span>
+                                        {{ $pengajuan->status }}
                                     </span>
                                 </div>
 
                                 <div class="text-right">
-                                    <span class="text-[10px] uppercase tracking-wider text-slate-400 block mb-1">Tanggal Kirim</span>
-                                    <span class="text-xs font-medium text-slate-700">
+                                    <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                        Tanggal Kirim
+                                    </p>
+                                    <p class="text-xs font-medium text-slate-700">
                                         {{ \Illuminate\Support\Carbon::parse($pengajuan->created_at)->format('d M Y, H:i') }}
-                                    </span>
+                                    </p>
                                 </div>
                             </div>
 
-                            <!-- Judul Skripsi -->
-                            <div>
-                                <h3 class="text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">Judul Skripsi</h3>
-                                <p class="text-sm font-bold text-slate-900 leading-relaxed">
+                            <!-- JUDUL -->
+                            <div class="mb-4">
+                                <h3 class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                    Judul Skripsi
+                                </h3>
+                                <p class="text-sm font-semibold leading-relaxed text-slate-800">
                                     {{ $pengajuan->judul }}
                                 </p>
                             </div>
 
-                            <!-- Abstrak -->
+                            <!-- ABSTRAK -->
                             <div>
-                                <h3 class="text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">Abstrak Penelitian</h3>
-                                <div class="p-4 bg-slate-50/70 rounded-xl text-xs text-slate-700 leading-relaxed whitespace-pre-line border border-slate-100">
+                                <h3 class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                    Abstrak / Latar Belakang
+                                </h3>
+                                <div class="rounded-lg border border-slate-100 bg-slate-50 px-3.5 py-3 text-xs leading-relaxed text-slate-600 whitespace-pre-line">
                                     {{ $pengajuan->abstrak }}
                                 </div>
                             </div>
 
-                        </div>
+                        </section>
 
-                        <!-- SECTION TOMBOL SURAT PENGESAHAN (Hanya muncul jika status disetujui) -->
-                        @if(strtolower($pengajuan->status) == 'disetujui')
-                            <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between shadow-sm">
-                                <div>
-                                    <h4 class="text-sm font-bold text-emerald-800">Judul Telah Disetujui!</h4>
-                                    <p class="text-xs text-emerald-600 mt-0.5">Surat pengesahan resmi dari program studi sudah dapat dicetak.</p>
-                                </div>
-                                <a href="{{ route('mahasiswa.pengajuan.surat', $pengajuan->id) }}" target="_blank" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-2 shrink-0">
-                                    Cetak Surat Pengesahan
-                                </a>
+                        <!-- CATATAN DOSEN -->
+                        <section class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm">
+
+                            <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                                <h2 class="text-sm font-bold text-slate-800">
+                                    Catatan Dosen Pembimbing
+                                </h2>
+
+                                @if ($catatanRevisi->count() > 0)
+                                    <span class="rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-semibold text-sky-600">
+                                        {{ $catatanRevisi->count() }} Catatan
+                                    </span>
+                                @endif
                             </div>
+
+                            @if ($catatanRevisi->count() > 0)
+                                <div class="catatan-scroll space-y-3 pr-2">
+                                    @foreach ($catatanRevisi as $catatan)
+                                        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
+                                                    {{ mb_strtoupper(mb_substr($catatan->nama_dosen, 0, 2)) }}
+                                                </div>
+
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-semibold text-slate-800">
+                                                        {{ $catatan->nama_dosen }}
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-400">
+                                                        Dosen Pembimbing
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3 whitespace-pre-line break-words text-xs leading-relaxed text-slate-600">
+                                                {{ $catatan->catatan }}
+                                            </div>
+
+                                            <p class="mt-2 border-t border-slate-200 pt-2 text-[10px] text-slate-400">
+                                                {{ \Illuminate\Support\Carbon::parse($catatan->created_at)->format('d M Y • H:i') }}
+                                            </p>
+
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="rounded-lg bg-slate-50 px-4 py-5 text-center">
+                                    <p class="text-xs text-slate-400">
+                                        Belum ada catatan dari Dosen Pembimbing.
+                                    </p>
+                                </div>
+                            @endif
+
+                        </section>
+
+                        <!-- SURAT PENGESAHAN -->
+                        @if ($status === 'disetujui')
+                            <section class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                                <div>
+                                    <h3 class="text-xs font-bold text-emerald-800">
+                                        Judul Telah Disetujui!
+                                    </h3>
+                                    <p class="mt-1 text-[10px] text-emerald-600">
+                                        Surat pengesahan sudah dapat dicetak.
+                                    </p>
+                                </div>
+
+                                <a href="{{ route('mahasiswa.pengajuan.surat', $pengajuan->id) }}"
+                                   target="_blank"
+                                   class="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700">
+                                    Cetak Surat
+                                </a>
+                            </section>
                         @endif
-
-                        <!-- SECTION CATATAN / REVISI DARI DOSEN (DARI TABEL CATATAN_REVISI) -->
-                        <div class="space-y-4">
-                            <h3 class="text-sm font-bold text-slate-900 px-1">
-                                Catatan & Evaluasi Dosen Pembimbing
-                            </h3>
-
-                            @forelse($catatanRevisi as $catatan)
-                                <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 space-y-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700 text-xs">
-                                            {{ mb_strtoupper(mb_substr($catatan->nama_dosen, 0, 2)) }}
-                                        </div>
-                                        <div>
-                                            <p class="text-xs font-bold text-slate-900">{{ $catatan->nama_dosen }}</p>
-                                            <p class="text-[10px] text-slate-400">Dosen Pembimbing</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-slate-700 leading-relaxed pl-13">
-                                        {{ $catatan->catatan }}
-                                    </p>
-                                    <p class="text-[10px] text-slate-400 pl-13 pt-1">
-                                        {{ \Illuminate\Support\Carbon::parse($catatan->created_at)->format('d M Y • H:i') }}
-                                    </p>
-                                </div>
-                            @empty
-                                <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-5 text-center">
-                                    <p class="text-xs text-slate-400">Belum ada catatan atau evaluasi dari Dosen Pembimbing.</p>
-                                </div>
-                            @endforelse
-
-                        </div>
 
                     </div>
 
-                    <!-- KOLOM KANAN / SIDEBAR INFO -->
-                    <div class="space-y-6">
+                    <!-- KOLOM SAMPING -->
+                    <div class="space-y-4">
 
-                        <!-- CARD DOSEN PEMBIMBING -->
-                        <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-6 space-y-4">
-                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
+                        <!-- DOSEN PEMBIMBING -->
+                        <section class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm">
+                            <h3 class="mb-3 border-b border-slate-100 pb-2 text-xs font-bold text-slate-800">
                                 Tim Pembimbing
                             </h3>
-                            
+
                             <div class="space-y-3">
                                 <div>
-                                    <span class="text-[10px] uppercase text-slate-400 block">Pembimbing 1</span>
-                                    <span class="text-xs font-bold text-slate-800">{{ $pengajuan->dospem_1_nama }}</span>
+                                    <p class="mb-1 text-[10px] text-slate-400">
+                                        Pembimbing 1
+                                    </p>
+                                    <p class="text-xs font-semibold text-slate-700">
+                                        {{ $pengajuan->dospem_1_nama ?? '-' }}
+                                    </p>
                                 </div>
-                                <div>
-                                    <span class="text-[10px] uppercase text-slate-400 block">Pembimbing 2</span>
-                                    <span class="text-xs font-bold text-slate-800">{{ $pengajuan->dospem_2_nama }}</span>
+
+                                <div class="border-t border-slate-100 pt-3">
+                                    <p class="mb-1 text-[10px] text-slate-400">
+                                        Pembimbing 2
+                                    </p>
+                                    <p class="text-xs font-semibold text-slate-700">
+                                        {{ $pengajuan->dospem_2_nama ?? '-' }}
+                                    </p>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
-                        <!-- CARD BERKAS PROPOSAL -->
-                        <div class="bg-white rounded-2xl border border-sky-100 shadow-sm p-6 space-y-4">
-                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
+                        <!-- BERKAS PROPOSAL -->
+                        <section class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm">
+                            <h3 class="mb-3 border-b border-slate-100 pb-2 text-xs font-bold text-slate-800">
                                 Berkas Proposal
                             </h3>
 
-                            <div class="space-y-2">
-                                <p class="text-xs font-medium text-slate-600 truncate" title="{{ Str::after(basename($pengajuan->file_proposal), '_') }}">
-                                    📄 {{ Str::after(basename($pengajuan->file_proposal), '_') }}
+                            <div class="mb-3 flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 p-3">
+                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-[10px] font-bold text-rose-500">
+                                    PDF
+                                </div>
+
+                                <p class="truncate text-xs font-medium text-slate-600"
+                                   title="{{ basename($pengajuan->file_proposal) }}">
+                                    {{ Str::after(basename($pengajuan->file_proposal), '_') }}
                                 </p>
-                                <a href="{{ asset('storage/' . $pengajuan->file_proposal) }}" target="_blank" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    Buka File PDF
-                                </a>
                             </div>
-                        </div>
+
+                            <a href="{{ asset('storage/' . $pengajuan->file_proposal) }}"
+                               target="_blank"
+                               class="flex w-full items-center justify-center gap-2 rounded-lg border border-sky-200 bg-white px-3 py-2.5 text-xs font-semibold text-sky-600 shadow-sm transition hover:bg-sky-50 hover:text-sky-700">
+
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+
+                                Buka File PDF
+                            </a>
+                        </section>
 
                     </div>
-
                 </div>
 
             </div>
-
         </main>
-
     </div>
 
 </body>

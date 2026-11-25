@@ -18,108 +18,54 @@
 
 <div class="min-h-screen md:flex">
 
-    <!-- SIDEBAR -->
-    <aside class="flex w-full flex-col border-b border-sky-100 bg-white md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
+    <x-sidebar-dospem />
 
-        <!-- LOGO -->
-        <div class="px-5 py-5">
-            <p class="text-2xl font-black tracking-tight text-sky-600">
-                SISTA
-            </p>
-
-            <p class="mt-1 text-[8px] font-semibold uppercase tracking-widest text-slate-400">
-                Portal Skripsi Dosen Pembimbing
-            </p>
-        </div>
-
-        <!-- NAVIGASI -->
-        <nav class="flex gap-2 px-3 pb-3 md:flex-1 md:flex-col">
-
-            <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                Ruang Akademik
-            </p>
-
-            <a href="{{ route('dospem.dashboard') }}"
-               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
-                <i data-lucide="layout-grid" class="h-5 w-5"></i>
-                Dashboard
-            </a>
-
-            <a href="{{ route('dospem.pengajuan.index') }}"
-               class="flex items-center gap-3 rounded-lg bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700">
-                <i data-lucide="file-text" class="h-5 w-5"></i>
-                Pengajuan Masuk
-            </a>
-
-            <a href="{{ route('dospem.riwayat') }}"
-               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
-                <i data-lucide="clock-3" class="h-5 w-5"></i>
-                Riwayat Review
-            </a>
-
-            <a href="{{ route('dospem.profil') }}"
-               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-slate-500 hover:bg-sky-50 hover:text-sky-700">
-                <i data-lucide="circle-user-round" class="h-5 w-5"></i>
-                Profil
-            </a>
-
-        </nav>
-
-        <!-- LOGOUT -->
-        <div class="border-t border-slate-100 p-3">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-
-                <button type="submit"
-                    class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                    <i data-lucide="log-out" class="h-5 w-5"></i>
-                    Logout
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    <!-- KONTEN UTAMA -->
     <main class="min-w-0 flex-1">
 
-        <!-- HEADER -->
-        <div class="flex min-h-[52px] items-center justify-between gap-3 border-b border-sky-100 bg-white px-5 py-2.5 md:px-7">
+        <!-- TOPBAR -->
+        <x-topbar-dospem>
+            <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
 
-            <div class="flex items-center gap-2 text-xs text-slate-500">
-                <span>Dosen Pembimbing</span>
-                <span>›</span>
-                <span class="font-medium text-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-4 w-4 text-slate-400"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="m3 10 9-7 9 7"/>
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M5 9v11h14V9"/>
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 20v-6h6v6"/>
+                </svg>
+
+                <span class="text-slate-400">Dosen Pembimbing</span>
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-3 w-3 text-slate-400"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="m9 18 6-6-6-6"/>
+                </svg>
+
+                <span class="font-semibold text-slate-800">
                     Pengajuan Masuk
                 </span>
+
             </div>
-
-            <div class="flex items-center gap-2.5">
-                <div class="text-right">
-                    <p class="text-xs font-semibold text-slate-700">
-                        {{ auth()->user()->name }}
-                    </p>
-                    <p class="text-[10px] text-slate-400">
-                        Dosen Pembimbing
-                    </p>
-                </div>
-
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
-                    {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
-                </div>
-            </div>
-
-        </div>
+        </x-topbar-dospem>
 
         <!-- ISI HALAMAN -->
         <div class="p-4 md:p-6">
 
-            <header class="mb-5">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-sky-700">
-                    Dosen Pembimbing
-                </p>
+            <!-- JUDUL HALAMAN -->
+            <header class="mb-6">
 
-                <h1 class="mt-1 text-2xl font-bold text-sky-900">
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">
                     Pengajuan Masuk
                 </h1>
 
@@ -129,11 +75,11 @@
             </header>
 
             <!-- TABEL PENGAJUAN -->
-            <section class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <section class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
-                <div class="flex items-center justify-between px-4 py-4">
+                <div class="flex items-center justify-between gap-3 px-4 py-4">
                     <div>
-                        <h2 class="text-sm font-bold text-slate-900">
+                        <h2 class="text-sm font-bold text-slate-800">
                             Daftar Pengajuan
                         </h2>
 
@@ -142,7 +88,7 @@
                         </p>
                     </div>
 
-                    <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                    <span class="shrink-0 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
                         {{ $pengajuanMasuk->count() }} Pengajuan
                     </span>
                 </div>
@@ -168,48 +114,45 @@
                                 <tbody class="divide-y divide-slate-100">
 
                                     @foreach ($pengajuanMasuk as $item)
-                                        <tr>
-                                            <!-- NOMOR -->
+                                        <tr class="transition hover:bg-sky-50/50">
+
                                             <td class="px-4 py-3 text-slate-600">
                                                 {{ $loop->iteration }}
                                             </td>
 
-                                            <!-- NAMA DAN NPM MAHASISWA -->
                                             <td class="px-4 py-3">
                                                 <p class="font-semibold text-slate-700">
                                                     {{ $item->nama_mahasiswa }}
                                                 </p>
+
                                                 <p class="mt-1 text-[10px] text-slate-400">
                                                     {{ $item->npm_mahasiswa ?? '-' }}
                                                 </p>
                                             </td>
 
-                                            <!-- JUDUL SKRIPSI -->
-                                            <td class="px-4 py-3 text-slate-600">
+                                            <td class="max-w-xs px-4 py-3 text-slate-600">
                                                 {{ $item->judul }}
                                             </td>
 
-                                            <!-- TANGGAL PENGAJUAN -->
                                             <td class="px-4 py-3 text-slate-500">
                                                 {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}
                                             </td>
 
-                                            <!-- STATUS -->
                                             <td class="px-4 py-3">
-                                                <span class="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-700">
+                                                <span class="inline-flex rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-700">
                                                     {{ ucfirst($item->status) }}
                                                 </span>
                                             </td>
 
-                                            <!-- TOMBOL DETAIL: SUDAH AKTIF -->
                                             <td class="px-4 py-3">
                                                 <a href="{{ route('dospem.pengajuan.detail', $item->id) }}"
                                                    class="inline-flex items-center gap-2 rounded-lg bg-sky-100 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-200 hover:text-sky-900">
 
-                                                   <i data-lucide="eye" class="h-4 w-4"></i>
-                                                   Detail
+                                                    <i data-lucide="eye" class="h-4 w-4"></i>
+                                                    Detail
                                                 </a>
                                             </td>
+
                                         </tr>
                                     @endforeach
 
@@ -220,6 +163,11 @@
                     @else
 
                         <div class="py-10 text-center">
+
+                            <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-sky-50 text-sky-500">
+                                <i data-lucide="file-text" class="h-5 w-5"></i>
+                            </div>
+
                             <h3 class="text-sm font-semibold text-slate-700">
                                 Belum Ada Pengajuan
                             </h3>
@@ -227,6 +175,7 @@
                             <p class="mt-1 text-xs text-slate-500">
                                 Belum ada pengajuan mahasiswa yang menunggu review.
                             </p>
+
                         </div>
 
                     @endif

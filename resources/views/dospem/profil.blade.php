@@ -1,304 +1,259 @@
+@php
+    $user = auth()->user();
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Dosen Pembimbing - SISTA</title>
+    <title>Profil Saya - SISTA</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
 
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
 
 <body class="min-h-screen bg-[#E8F5FF] text-slate-800">
 
-<div class="min-h-screen md:flex">
+    <div class="min-h-screen md:flex">
 
-    <!-- SIDEBAR -->
-    <aside class="flex w-full flex-col border-b border-sky-100 bg-white md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
+        {{-- SIDEBAR --}}
+        <x-sidebar-dospem />
 
-        <!-- LOGO -->
-        <div class="px-5 py-5">
-            <p class="text-2xl font-black tracking-tight text-sky-600">
-                SISTA
-            </p>
-            <p class="mt-1 text-[8px] font-semibold uppercase tracking-widest text-slate-400">
-                Portal Skripsi Dosen Pembimbing
-            </p>
-        </div>
+        {{-- MAIN CONTENT --}}
+        <main class="min-w-0 flex-1">
 
-        <!-- NAVIGASI -->
-        <nav class="flex gap-2 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col">
+            {{-- TOPBAR --}}
+            <x-topbar-dospem>
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
 
-            <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                Ruang Akademik
-            </p>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-4 w-4 text-slate-400"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m3 10 9-7 9 7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 9v11h14V9"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20v-6h6v6"/>
+                    </svg>
 
-            <a href="{{ route('dospem.dashboard') }}"
-               class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
-                <i data-lucide="layout-grid" class="h-5 w-5"></i>
-                Dashboard
-            </a>
+                    <span class="text-slate-400">Dosen Pembimbing</span>
 
-            <a href="{{ route('dospem.pengajuan.index') }}"
-               class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
-                <i data-lucide="file-text" class="h-5 w-5"></i>
-                Pengajuan Masuk
-            </a>
+                    <i data-lucide="chevron-right" class="h-3 w-3 text-slate-400"></i>
 
-            <a href="{{ route('dospem.riwayat') }}"
-               class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
-                <i data-lucide="clock-3" class="h-5 w-5"></i>
-                Riwayat Review
-            </a>
+                    <span class="font-semibold text-slate-800">
+                        Profil Saya
+                    </span>
 
-            <a href="{{ route('dospem.profil') }}"
-               class="flex items-center gap-3 whitespace-nowrap rounded-lg bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700">
-                <i data-lucide="circle-user-round" class="h-5 w-5"></i>
-                Profil
-            </a>
-
-        </nav>
-
-        <!-- LOGOUT -->
-        <div class="border-t border-slate-100 p-3">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-
-                <button type="submit"
-                        class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm text-rose-600 transition hover:bg-rose-50">
-                    <i data-lucide="log-out" class="h-5 w-5"></i>
-                    Logout
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    <!-- KONTEN UTAMA -->
-    <main class="min-w-0 flex-1">
-
-        <!-- TOPBAR -->
-        <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-3 border-b border-sky-100 bg-white px-5 py-2.5 md:px-7">
-
-            <div class="flex items-center gap-2 text-xs text-slate-500">
-                <span>Dosen Pembimbing</span>
-                <span>›</span>
-                <span class="font-semibold text-slate-700">
-                    Profil
-                </span>
-            </div>
-
-            <div class="flex items-center gap-2.5">
-
-                <div class="text-right">
-                    <p class="max-w-[180px] truncate text-xs font-semibold text-slate-700">
-                        {{ $user->name }}
-                    </p>
-                    <p class="text-[10px] text-slate-400">
-                        Dosen Pembimbing
-                    </p>
                 </div>
+            </x-topbar-dospem>
 
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
-                    {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
-                </div>
+            {{-- PAGE CONTENT --}}
+            <div class="p-4 md:p-5">
 
-            </div>
+                {{-- HEADER --}}
+                <header class="mb-4">
+                    <h1 class="text-xl font-bold tracking-tight text-slate-800">
+                        Profil Saya
+                    </h1>
 
-        </div>
+                    <p class="mt-1 text-xs text-slate-500">
+                        Lihat informasi identitas akun Anda.
+                    </p>
+                </header>
 
-        <!-- ISI HALAMAN -->
-        <div class="p-4 md:p-6">
+                {{-- KARTU PROFIL --}}
+                <section class="mb-4 flex items-center gap-4 rounded-xl border border-sky-100 bg-white px-4 py-3 shadow-sm md:px-5">
 
-            <header class="mb-6">
-
-                <p class="text-[10px] font-bold uppercase tracking-widest text-sky-700">
-                    Dosen Pembimbing
-                </p>
-
-                <h1 class="mt-1 text-2xl font-bold text-sky-900">
-                    Profil Saya
-                </h1>
-
-                <p class="mt-1 text-xs text-slate-500">
-                    Informasi identitas dan akun dosen pembimbing.
-                </p>
-
-            </header>
-
-            <!-- KARTU PROFIL UTAMA -->
-            <section class="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
-
-                <div class="h-24 bg-gradient-to-r from-sky-600 to-cyan-400"></div>
-
-                <div class="px-5 pb-6">
-
-                    <div class="-mt-8 flex flex-wrap items-end justify-between gap-3">
-
-                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-sky-100 text-2xl font-bold text-sky-700 shadow-sm">
-                            {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
-                        </div>
-
-                        <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                            Akun Dosen Pembimbing
-                        </span>
-
+                    {{-- AVATAR --}}
+                    <div class="flex h-[66px] w-[66px] shrink-0 items-center justify-center rounded-full border-[3px] border-white bg-[#DDF2FF] text-2xl font-bold uppercase text-[#269FE8] shadow-[0_0_0_2px_#BAE6FD]">
+                        {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
                     </div>
 
-                    <h2 class="mt-4 text-xl font-bold text-slate-900">
-                        {{ $user->name }}
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Dosen Pembimbing
-                    </p>
-
-                    <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-
-                        <span class="flex items-center gap-2">
-                            <i data-lucide="mail" class="h-4 w-4 text-sky-600"></i>
-                            {{ $user->email }}
-                        </span>
-
-                        @if (filled($user->nip))
-                            <span class="flex items-center gap-2">
-                                <i data-lucide="id-card" class="h-4 w-4 text-sky-600"></i>
-                                NIP: {{ $user->nip }}
-                            </span>
-                        @endif
-
-                    </div>
-
-                </div>
-
-            </section>
-
-            <div class="grid gap-5 xl:grid-cols-3">
-
-                <!-- INFORMASI PRIBADI -->
-                <section class="overflow-hidden rounded-xl border border-slate-200 bg-white xl:col-span-2">
-
-                    <div class="border-b border-slate-100 px-5 py-4">
-                        <h2 class="flex items-center gap-2 text-sm font-bold text-slate-900">
-                            <i data-lucide="user-round" class="h-4 w-4 text-sky-600"></i>
-                            Informasi Dosen
+                    {{-- NAMA DAN STATUS --}}
+                    <div class="min-w-0">
+                        <h2 class="truncate text-base font-bold text-slate-800 md:text-lg">
+                            {{ $user->name }}
                         </h2>
-                    </div>
 
-                    <div class="grid gap-5 p-5 sm:grid-cols-2">
+                        <p class="mt-1 text-xs text-slate-500">
+                            Dosen Pembimbing
+                        </p>
 
-                        <div>
-                            <p class="text-xs text-slate-400">
-                                Nama Lengkap
-                            </p>
-
-                            <p class="mt-1 text-sm font-semibold text-slate-800">
-                                {{ $user->name }}
-                            </p>
+                        <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[10px] font-semibold text-green-600">
+                            <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                            Akun Aktif
                         </div>
-
-                        <div>
-                            <p class="text-xs text-slate-400">
-                                NIP
-                            </p>
-
-                            <p class="mt-1 text-sm font-semibold text-slate-800">
-                                {{ $user->nip ?: 'Belum tersedia' }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-slate-400">
-                                Email
-                            </p>
-
-                            <p class="mt-1 break-all text-sm font-semibold text-slate-800">
-                                {{ $user->email }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-slate-400">
-                                Peran Akun
-                            </p>
-
-                            <p class="mt-1 text-sm font-semibold text-slate-800">
-                                Dosen Pembimbing
-                            </p>
-                        </div>
-
                     </div>
 
                 </section>
 
-                <!-- INFORMASI AKUN -->
-                <section class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                {{-- INFORMASI PROFIL --}}
+                <div class="grid gap-4 lg:grid-cols-2">
 
-                    <div class="border-b border-slate-100 px-5 py-4">
-                        <h2 class="flex items-center gap-2 text-sm font-bold text-slate-900">
-                            <i data-lucide="shield-check" class="h-4 w-4 text-sky-600"></i>
-                            Informasi Akun
-                        </h2>
-                    </div>
+                    {{-- INFORMASI PRIBADI --}}
+                    <section class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
-                    <div class="space-y-4 p-5">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
 
-                        <div>
-                            <p class="text-xs text-slate-400">
-                                Status Akun
-                            </p>
-                            <p class="mt-1 text-sm font-semibold text-emerald-700">
-                                Terdaftar
-                            </p>
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                                <i data-lucide="user-round" class="h-4 w-4"></i>
+                            </div>
+
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-800">
+                                    Informasi Pribadi
+                                </h2>
+
+                                <p class="mt-0.5 text-[11px] text-slate-400">
+                                    Informasi identitas akun dosen pembimbing.
+                                </p>
+                            </div>
+
                         </div>
 
-                        <div class="border-t border-slate-100 pt-4">
-                            <p class="text-xs text-slate-400">
-                                Tanggal Pendaftaran
-                            </p>
-                            <p class="mt-1 text-sm font-semibold text-slate-800">
-                                {{ $user->created_at ? $user->created_at->format('d/m/Y') : '-' }}
-                            </p>
+                        <div class="space-y-3 p-4">
+
+                            {{-- NAMA --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold text-slate-700">
+                                    Nama Lengkap
+                                </p>
+
+                                <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                    <i data-lucide="user" class="h-4 w-4 shrink-0 text-sky-600"></i>
+
+                                    <p class="text-xs font-semibold text-slate-700">
+                                        {{ $user->name }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- NIP --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold text-slate-700">
+                                    NIP
+                                </p>
+
+                                <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                    <i data-lucide="id-card" class="h-4 w-4 shrink-0 text-sky-600"></i>
+
+                                    <p class="text-xs font-semibold text-slate-700">
+                                        {{ $user->nip ?: 'Belum tersedia' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- EMAIL --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold text-slate-700">
+                                    Email
+                                </p>
+
+                                <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                    <i data-lucide="mail" class="h-4 w-4 shrink-0 text-sky-600"></i>
+
+                                    <p class="break-all text-xs font-semibold text-slate-700">
+                                        {{ $user->email }}
+                                    </p>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <div class="border-t border-slate-100 pt-4">
-                            <p class="text-xs text-slate-400">
-                                Keamanan
-                            </p>
-                            <p class="mt-1 text-xs leading-6 text-slate-600">
-                                Informasi akun ditampilkan sesuai pengguna yang sedang login.
-                            </p>
+                    </section>
+
+                    {{-- INFORMASI AKUN --}}
+                    <section class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
+
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                                <i data-lucide="shield-check" class="h-4 w-4"></i>
+                            </div>
+
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-800">
+                                    Informasi Akun
+                                </h2>
+
+                                <p class="mt-0.5 text-[11px] text-slate-400">
+                                    Detail akun dan akses sistem.
+                                </p>
+                            </div>
+
                         </div>
 
-                    </div>
+                        <div class="space-y-3 p-4">
 
-                </section>
+                            {{-- STATUS AKUN --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold text-slate-700">
+                                    Status Akun
+                                </p>
+
+                                <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                    <i data-lucide="check-circle" class="h-4 w-4 shrink-0 text-emerald-600"></i>
+
+                                    <p class="text-xs font-semibold text-emerald-600">
+                                        Terdaftar
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- PERAN --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold text-slate-700">
+                                    Peran Akun
+                                </p>
+
+                                <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                    <i data-lucide="briefcase-business" class="h-4 w-4 shrink-0 text-sky-600"></i>
+
+                                    <p class="text-xs font-semibold text-slate-700">
+                                        Dosen Pembimbing
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- TANGGAL PENDAFTARAN --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold text-slate-700">
+                                    Tanggal Pendaftaran
+                                </p>
+
+                                <div class="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                                    <i data-lucide="calendar-days" class="h-4 w-4 shrink-0 text-sky-600"></i>
+
+                                    <p class="text-xs font-semibold text-slate-700">
+                                        {{ $user->created_at ? $user->created_at->format('d/m/Y') : '-' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </div>
 
             </div>
 
-            <!-- KETERANGAN -->
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-sky-100 bg-white p-4">
-                <i data-lucide="info" class="mt-0.5 h-5 w-5 shrink-0 text-sky-600"></i>
+        </main>
 
-                <p class="text-xs leading-6 text-slate-600">
-                    Halaman profil saat ini bersifat hanya-baca.
-                    Fitur mengubah data profil atau kata sandi
-                    belum tersedia pada tahap ini.
-                </p>
-            </div>
+    </div>
 
-        </div>
-
-    </main>
-
-</div>
-
-<script>
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-</script>
+    <script>
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    </script>
 
 </body>
 </html>

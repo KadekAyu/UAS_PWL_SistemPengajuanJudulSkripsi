@@ -231,6 +231,14 @@ Route::middleware('auth')
         ->whereNumber('id')
         ->name('pengajuan.detail');
 
+        // SIMPAN CATATAN DAN KEPUTUSAN REVIEW
+        Route::post(
+            '/pengajuan/{id}/review',
+            [DospemDashboardController::class, 'review']
+        )
+        ->whereNumber('id')
+        ->name('pengajuan.review');
+
         // LIHAT FILE PROPOSAL PDF
         Route::get(
             '/pengajuan/{id}/proposal',
@@ -244,6 +252,12 @@ Route::middleware('auth')
             '/riwayat',
             [DospemDashboardController::class, 'riwayatReview']
         )->name('riwayat');
+
+        // HALAMAN MAHASISWA BIMBINGAN
+        Route::get(
+            '/mahasiswa-bimbingan',
+            [DospemDashboardController::class, 'mahasiswaBimbingan']
+        )->name('mahasiswa-bimbingan');
 
         // HALAMAN PROFIL DOSEN PEMBIMBING
         Route::get(
