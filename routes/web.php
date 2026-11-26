@@ -200,6 +200,14 @@ Route::middleware('auth')
             [KaprodiDashboardController::class, 'riwayatKeputusan']
         )->name('riwayat');
 
+        // PROSES PENUNJUKAN DOSEN OLEH KAPRODI
+        Route::post(
+            '/pengajuan/{pengajuan}/tunjuk-dospem',
+            [KaprodiDashboardController::class, 'tunjukDospem']
+            )
+            ->whereNumber('pengajuan')
+            ->name('pengajuan.tunjuk-dospem');
+
         // PROSES PENGESAHAN
         Route::post(
             '/pengajuan/{pengajuan}/sahkan',

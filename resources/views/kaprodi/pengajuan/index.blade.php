@@ -44,7 +44,7 @@
                 </p>
                 <h1 class="mt-1 text-2xl font-bold text-sky-900">Pengajuan Masuk</h1>
                 <p class="mt-1 text-xs text-slate-500">
-                    Tinjau pengajuan yang telah disetujui kedua dosen pembimbing dan buka detailnya untuk mengesahkan.
+                    Tinjau pengajuan mahasiswa, tentukan dosen pembimbing, dan lakukan pengesahan setelah mendapat persetujuan dosen.
                 </p>
             </header>
 
@@ -55,12 +55,12 @@
                             Pengajuan Masuk
                         </h2>
                         <p class="mt-1 text-xs text-slate-500">
-                            Judul yang telah disetujui kedua dosen pembimbing dan siap disahkan.
+                            Daftar pengajuan yang menunggu penunjukan dosen atau pengesahan akhir oleh Kaprodi.
                         </p>
                     </div>
 
                     <span class="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-semibold text-amber-700">
-                        {{ $pengajuanMasuk->count() }} menunggu
+                        {{ $pengajuanMasuk->count() }} Pengajuan
                     </span>
                 </div>
 
@@ -70,10 +70,10 @@
                             <i data-lucide="inbox" class="h-6 w-6 text-slate-400"></i>
                         </div>
                         <h3 class="mt-3 text-sm font-semibold text-slate-700">
-                            Belum Ada Pengajuan untuk Disahkan
+                            Belum Ada Pengajuan Masuk
                         </h3>
                         <p class="mt-1 text-xs text-slate-500">
-                            Pengajuan akan tampil setelah mendapat persetujuan kedua dosen pembimbing.
+                            Pengajuan baru mahasiswa dan pengajuan yang telah mendapat ACC dosen akan ditampilkan di sini.
                         </p>
                     </div>
                 @else
