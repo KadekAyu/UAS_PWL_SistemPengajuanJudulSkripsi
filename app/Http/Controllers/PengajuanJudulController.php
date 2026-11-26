@@ -17,6 +17,15 @@ class PengajuanJudulController extends Controller
         'dosen_pembimbing',
     ];
 
+    // Mengembalikan true jika mahasiswa masih memiliki pengajuan yang belum berstatus ditolak
+    private function hasUnrejectedSubmission(int $mahasiswaId): bool
+    {
+        return DB::table('pengajuan_judul')
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->whereRaw('LOWER(status) != ?', ['ditolak'])
+            ->exists();
+    }
+
     // MENAMPILKAN DASHBOARD MAHASISWA & RIWAYAT PENGAJUAN
     public function index()
     {
@@ -50,13 +59,16 @@ class PengajuanJudulController extends Controller
 
         abort_unless($user->role === 'mahasiswa', 403);
 
+        $hasUnrejectedSubmission = $this->hasUnrejectedSubmission($user->id);
+
         $dosenList = User::whereIn('role', self::DOSEN_ROLES)
             ->orderBy('name')
             ->get();
 
         return view('mahasiswa.pengajuan.create', compact(
             'user',
-            'dosenList'
+            'dosenList',
+            'hasUnrejectedSubmission'
         ));
     }
 
@@ -66,6 +78,12 @@ class PengajuanJudulController extends Controller
         $user = Auth::user();
 
         abort_unless($user->role === 'mahasiswa', 403);
+
+        if ($this->hasUnrejectedSubmission($user->id)) {
+            return redirect()
+                ->route('mahasiswa.riwayat')
+                ->with('error', 'Pengajuan judul baru ditolak karena masih ada pengajuan yang belum berstatus ditolak.');
+        }
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
@@ -215,7 +233,7 @@ class PengajuanJudulController extends Controller
             abort(403, 'Pengajuan tidak dapat direvisi.');
         }
 
-        // Mengambil daftar dosen untuk pilihan Dospem 1 dan 2
+        // Mengambil daftar dosen untuk tampilan informasi Dospem 1 dan 2
         $daftarDosen = User::whereIn('role', self::DOSEN_ROLES)
             ->orderBy('name')
             ->get();
@@ -246,19 +264,6 @@ class PengajuanJudulController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'abstrak' => 'required|string',
-
-            'dospem_1_id' => [
-                'required',
-                'different:dospem_2_id',
-                Rule::exists('users', 'id')->whereIn('role', self::DOSEN_ROLES),
-            ],
-
-            'dospem_2_id' => [
-                'required',
-                'different:dospem_1_id',
-                Rule::exists('users', 'id')->whereIn('role', self::DOSEN_ROLES),
-            ],
-
             'file_proposal' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
@@ -286,8 +291,8 @@ class PengajuanJudulController extends Controller
                 'judul' => $validated['judul'],
                 'abstrak' => $validated['abstrak'],
                 'file_proposal' => $filePath,
-                'dospem_1_id' => $validated['dospem_1_id'],
-                'dospem_2_id' => $validated['dospem_2_id'],
+                'dospem_1_id' => $pengajuan->dospem_1_id,
+                'dospem_2_id' => $pengajuan->dospem_2_id,
                 'status' => 'menunggu',
                 'updated_at' => now(),
             ]);
