@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Kaprodi - SISTA</title>
-    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -17,90 +16,16 @@
 
     <div class="min-h-screen md:flex">
 
-        <!-- SIDEBAR -->
-        <aside class="flex w-full flex-col border-b border-sky-100 bg-white md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
-
-            <div class="px-5 py-5">
-                <p class="text-2xl font-black tracking-tight text-sky-600">
-                    SISTA
-                </p>
-
-                <p class="mt-1 text-[8px] font-semibold uppercase tracking-widest text-slate-400">
-                    Portal Skripsi Ketua Program Studi
-                </p>
-            </div>
-
-            <nav class="flex gap-2 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col">
-
-                <p class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                    Ruang Akademik
-                </p>
-
-                <a href="{{ route('kaprodi.dashboard') }}"
-                   class="flex items-center gap-3 whitespace-nowrap rounded-lg bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700">
-                    <i data-lucide="layout-grid" class="h-5 w-5"></i>
-                    Dashboard
-                </a>
-
-                <a href="{{ route('kaprodi.pengajuan.index') }}"
-                   class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
-                    <i data-lucide="file-check-2" class="h-5 w-5"></i>
-                    Pengajuan Masuk
-                </a>
-
-                <a href="{{ route('kaprodi.riwayat') }}"
-                   class="flex items-center gap-3 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">
-                    <i data-lucide="clock-3" class="h-5 w-5"></i>
-                    Riwayat Keputusan
-                </a>
-
-            </nav>
-
-            <div class="border-t border-slate-100 p-3">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-
-                    <button type="submit"
-                        class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm text-rose-600 transition hover:bg-rose-50 hover:text-rose-700">
-                        <i data-lucide="log-out" class="h-5 w-5"></i>
-                        Logout
-                    </button>
-                </form>
-            </div>
-
-        </aside>
+        <x-sidebar-kaprodi />
 
         <!-- KONTEN UTAMA -->
         <main class="min-w-0 flex-1">
 
-            <!-- HEADER -->
-            <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-3 border-b border-sky-100 bg-white px-5 py-2.5 md:px-7">
-
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <span>Ketua Program Studi</span>
-                    <span class="text-slate-300">›</span>
-                    <span class="font-medium text-slate-700">Dashboard</span>
-                </div>
-
-                <div class="flex items-center gap-2.5">
-
-                    <div class="text-right">
-                        <p class="max-w-[180px] truncate text-xs font-semibold text-slate-700">
-                            {{ auth()->user()->name }}
-                        </p>
-
-                        <p class="text-[10px] text-slate-400">
-                            Ketua Program Studi
-                        </p>
-                    </div>
-
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700">
-                        {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
-                    </div>
-
-                </div>
-
-            </div>
+            <x-topbar-kaprodi>
+                <span>Ketua Program Studi</span>
+                <span class="text-slate-300">›</span>
+                <span class="font-medium text-slate-700">Dashboard</span>
+            </x-topbar-kaprodi>
 
             <div class="p-4 md:p-6">
 
@@ -116,7 +41,7 @@
                     </h1>
 
                     <p class="mt-1 text-xs text-slate-500">
-                        Pantau pengajuan dan sahkan judul skripsi mahasiswa.
+                        Pantau pengajuan yang sudah di-ACC dua pembimbing dan sahkan judul skripsi mahasiswa.
                     </p>
 
                 </header>
@@ -134,13 +59,12 @@
                 @endif
 
                 <!-- STATISTIK -->
-                <section class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <section class="mb-5 grid gap-3 sm:grid-cols-3">
 
                     @foreach ([
-                        ['label' => 'Total Pengajuan', 'value' => $statistics['total'], 'tone' => 'sky'],
                         ['label' => 'Menunggu Pengesahan', 'value' => $statistics['menunggu'], 'tone' => 'amber'],
                         ['label' => 'Sudah Disahkan', 'value' => $statistics['disahkan'], 'tone' => 'emerald'],
-                        ['label' => 'Ditolak', 'value' => $statistics['ditolak'], 'tone' => 'rose'],
+                        ['label' => 'Total Diproses Kaprodi', 'value' => $statistics['total_diproses'], 'tone' => 'sky'],
                     ] as $card)
 
                         <article class="rounded-xl border border-slate-200 bg-white px-4 py-3">
@@ -157,7 +81,6 @@
                                 'sky' => 'bg-sky-400',
                                 'amber' => 'bg-amber-400',
                                 'emerald' => 'bg-emerald-500',
-                                'rose' => 'bg-rose-400',
                             ][$card['tone']] }}"></div>
 
                         </article>
@@ -177,7 +100,7 @@
                             </h2>
 
                             <p class="mt-1 text-xs text-slate-500">
-                                Tinjau pengajuan dan tentukan dosen pembimbing final.
+                                Judul yang telah disetujui kedua dosen pembimbing dan siap disahkan.
                             </p>
                         </div>
 
@@ -196,7 +119,7 @@
                             </h3>
 
                             <p class="mt-1 text-xs text-slate-500">
-                                Pengajuan akan tampil setelah mendapat persetujuan dosen pembimbing.
+                                Pengajuan akan tampil setelah mendapat persetujuan kedua dosen pembimbing.
                             </p>
 
                         </div>
@@ -219,117 +142,32 @@
 
                                     @foreach ($menungguPengesahan as $pengajuan)
 
-                                        <details class="group">
+                                        <div class="grid grid-cols-[1.1fr_0.9fr_2fr_1fr_0.65fr] items-center gap-4 px-5 py-3 text-xs transition hover:bg-sky-50/50">
 
-                                            <summary class="grid cursor-pointer list-none grid-cols-[1.1fr_0.9fr_2fr_1fr_0.65fr] items-center gap-4 px-5 py-3 text-xs hover:bg-sky-50/50 [&::-webkit-details-marker]:hidden">
+                                            <span class="font-medium text-slate-700">
+                                                {{ $pengajuan->nama_mahasiswa }}
+                                            </span>
 
-                                                <span class="font-medium text-slate-700">
-                                                    {{ $pengajuan->nama_mahasiswa }}
+                                            <span class="text-slate-600">
+                                                {{ $pengajuan->npm }}
+                                            </span>
+
+                                            <span class="truncate text-slate-700" title="{{ $pengajuan->judul }}">
+                                                {{ $pengajuan->judul }}
+                                            </span>
+
+                                            <span>
+                                                <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700">
+                                                    {{ $pengajuan->status }}
                                                 </span>
+                                            </span>
 
-                                                <span class="text-slate-600">
-                                                    {{ $pengajuan->npm }}
-                                                </span>
+                                            <a href="{{ route('kaprodi.pengajuan.show', $pengajuan->id) }}"
+                                               class="inline-flex w-fit items-center justify-center rounded-md bg-blue-500 px-3 py-1.5 text-[10px] font-semibold text-white transition hover:bg-blue-600">
+                                                Review
+                                            </a>
 
-                                                <span class="truncate text-slate-700" title="{{ $pengajuan->judul }}">
-                                                    {{ $pengajuan->judul }}
-                                                </span>
-
-                                                <span>
-                                                    <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700">
-                                                        {{ $pengajuan->status }}
-                                                    </span>
-                                                </span>
-
-                                                <span class="inline-flex w-fit rounded-md bg-blue-500 px-3 py-1.5 text-[10px] font-semibold text-white group-open:bg-slate-600">
-                                                    <span class="group-open:hidden">Review</span>
-                                                    <span class="hidden group-open:inline">Tutup</span>
-                                                </span>
-
-                                            </summary>
-
-                                            <div class="border-t border-slate-100 bg-slate-50/70 px-5 py-4">
-
-                                                <div class="grid gap-4 lg:grid-cols-[1fr_auto]">
-
-                                                    <div>
-
-                                                        <p class="text-xs text-slate-500">
-                                                            Diajukan {{ \Illuminate\Support\Carbon::parse($pengajuan->created_at)->format('d M Y') }}
-                                                        </p>
-
-                                                        <h3 class="mt-1 text-sm font-semibold text-slate-900">
-                                                            {{ $pengajuan->judul }}
-                                                        </h3>
-
-                                                        <p class="mt-2 max-w-4xl text-xs leading-5 text-slate-600">
-                                                            {{ \Illuminate\Support\Str::limit($pengajuan->abstrak, 500) }}
-                                                        </p>
-
-                                                        <div class="mt-3 flex flex-wrap gap-2 text-xs">
-
-                                                            <span class="rounded-md bg-white px-3 py-2 text-slate-600 ring-1 ring-slate-200">
-                                                                Opsi 1: {{ $pengajuan->nama_dospem_1 }}
-                                                            </span>
-
-                                                            <span class="rounded-md bg-white px-3 py-2 text-slate-600 ring-1 ring-slate-200">
-                                                                Opsi 2: {{ $pengajuan->nama_dospem_2 }}
-                                                            </span>
-
-                                                            <a href="{{ \Illuminate\Support\Facades\Storage::url($pengajuan->file_proposal) }}"
-                                                               target="_blank"
-                                                               rel="noopener"
-                                                               class="rounded-md px-3 py-2 font-semibold text-sky-700 hover:bg-sky-50">
-                                                                Lihat Proposal PDF
-                                                            </a>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <form action="{{ route('kaprodi.pengajuan.sahkan', $pengajuan->id) }}"
-                                                          method="POST"
-                                                          class="flex flex-col gap-3 rounded-lg bg-white p-3 ring-1 ring-slate-200 lg:min-w-64">
-
-                                                        @csrf
-
-                                                        <label class="text-xs font-semibold text-slate-600">
-
-                                                            Dosen Pembimbing Final
-
-                                                            <select name="dospem_final_id"
-                                                                    required
-                                                                    class="mt-2 w-full rounded-md border-slate-200 text-xs text-slate-700 focus:border-sky-400 focus:ring-sky-400">
-
-                                                                <option value="">
-                                                                    Pilih dosen pembimbing
-                                                                </option>
-
-                                                                <option value="{{ $pengajuan->dospem_1_id }}">
-                                                                    {{ $pengajuan->nama_dospem_1 }}
-                                                                </option>
-
-                                                                <option value="{{ $pengajuan->dospem_2_id }}">
-                                                                    {{ $pengajuan->nama_dospem_2 }}
-                                                                </option>
-
-                                                            </select>
-
-                                                        </label>
-
-                                                        <button type="submit"
-                                                                onclick="return confirm('Sahkan judul ini dan terbitkan nomor SK?')"
-                                                                class="rounded-md bg-blue-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-600">
-                                                            Sahkan Judul
-                                                        </button>
-
-                                                    </form>
-
-                                                </div>
-
-                                            </div>
-
-                                        </details>
+                                        </div>
 
                                     @endforeach
 
@@ -343,7 +181,7 @@
 
                 </section>
 
-                <!-- RIWAYAT KEPUTUSAN -->
+                <!-- RIWAYAT PENGESAHAN -->
                 <section id="riwayat" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
 
                     <div class="px-4 py-3.5">
@@ -351,11 +189,11 @@
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <h2 class="text-sm font-bold text-slate-900">
-                                    Riwayat Keputusan
+                                    Riwayat Pengesahan
                                 </h2>
 
                                 <p class="mt-1 text-xs text-slate-500">
-                                    Pengajuan terbaru yang sudah disahkan atau ditolak.
+                                    Judul skripsi terbaru yang telah disahkan oleh Kaprodi.
                                 </p>
                             </div>
 
@@ -375,11 +213,11 @@
                             <div class="px-5 py-7 text-center">
 
                                 <h3 class="text-xs font-semibold text-slate-700">
-                                    Belum Ada Riwayat Keputusan
+                                    Belum Ada Riwayat Pengesahan
                                 </h3>
 
                                 <p class="mt-1 text-xs text-slate-500">
-                                    Keputusan pengajuan akan ditampilkan di sini.
+                                    Pengajuan yang sudah disahkan Kaprodi akan ditampilkan di sini.
                                 </p>
 
                             </div>
@@ -388,13 +226,14 @@
 
                             <div class="overflow-x-auto">
 
-                                <table class="w-full min-w-[640px] text-left text-xs">
+                                <table class="w-full min-w-[760px] text-left text-xs">
 
                                     <thead class="bg-slate-50 text-slate-500">
 
                                         <tr>
                                             <th class="px-5 py-3 font-semibold">Mahasiswa</th>
                                             <th class="px-5 py-3 font-semibold">Judul</th>
+                                            <th class="px-5 py-3 font-semibold">Pembimbing 1 & 2</th>
                                             <th class="px-5 py-3 font-semibold">Status</th>
                                             <th class="px-5 py-3 font-semibold">Nomor SK</th>
                                         </tr>
@@ -421,15 +260,20 @@
                                                     {{ $item->judul }}
                                                 </td>
 
+                                                <td class="px-5 py-3 text-slate-600">
+                                                    <p>{{ $item->nama_dospem_1 }}</p>
+                                                    <p class="text-[11px] text-slate-500">{{ $item->nama_dospem_2 }}</p>
+                                                </td>
+
                                                 <td class="px-5 py-3">
 
-                                                    <span class="rounded-full px-3 py-1 text-[10px] font-semibold {{ $item->status === 'ACC Final' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+                                                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-700">
                                                         {{ $item->status }}
                                                     </span>
 
                                                 </td>
 
-                                                <td class="px-5 py-3 text-slate-600">
+                                                <td class="px-5 py-3 font-medium text-slate-600">
                                                     {{ $item->nomor_sk ?? '—' }}
                                                 </td>
 
@@ -455,6 +299,5 @@
 
     </div>
 
-<script>lucide.createIcons();</script>
 </body>
 </html>
