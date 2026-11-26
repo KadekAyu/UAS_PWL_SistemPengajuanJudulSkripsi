@@ -64,7 +64,7 @@
                     </h1>
 
                     <p class="mt-1 text-xs text-slate-500">
-                        Lihat dan perbarui informasi akun Anda.
+                        Lihat informasi identitas dan perbarui email atau kata sandi akun Anda.
                     </p>
                 </header>
 
@@ -174,7 +174,7 @@
 
                                 <div class="space-y-2.5">
 
-                                    {{-- NAMA --}}
+                                    {{-- NAMA (READ-ONLY) --}}
                                     <div>
                                         <label for="name" class="mb-1 block text-xs font-semibold text-slate-700">
                                             Nama Lengkap
@@ -187,18 +187,17 @@
                                                 type="text"
                                                 id="name"
                                                 name="name"
-                                                value="{{ old('name', $user->name) }}"
-                                                required
-                                                maxlength="255"
-                                                class="profil-input w-full rounded-lg border border-slate-200 py-2 pl-10 pr-3 text-xs text-slate-700 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
-                                                placeholder="Masukkan nama lengkap"
+                                                value="{{ $user->name }}"
+                                                readonly
+                                                aria-readonly="true"
+                                                class="profil-input w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-3 text-xs text-slate-500 outline-none"
                                             >
                                         </div>
 
                                         <p class="profil-error" id="name-error">@error('name'){{ $message }}@enderror</p>
                                     </div>
 
-                                    {{-- NPM --}}
+                                    {{-- NPM (READ-ONLY) --}}
                                     <div>
                                         <label for="npm" class="mb-1 block text-xs font-semibold text-slate-700">
                                             NPM
@@ -211,19 +210,17 @@
                                                 type="text"
                                                 id="npm"
                                                 name="npm"
-                                                value="{{ old('npm', $user->npm) }}"
-                                                required
-                                                maxlength="10"
-                                                inputmode="numeric"
-                                                class="profil-input w-full rounded-lg border border-slate-200 py-2 pl-10 pr-3 text-xs text-slate-700 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
-                                                placeholder="Masukkan 10 angka NPM"
+                                                value="{{ $user->npm }}"
+                                                readonly
+                                                aria-readonly="true"
+                                                class="profil-input w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-3 text-xs text-slate-500 outline-none"
                                             >
                                         </div>
 
                                         <p class="profil-error" id="npm-error">@error('npm'){{ $message }}@enderror</p>
                                     </div>
 
-                                    {{-- EMAIL --}}
+                                    {{-- EMAIL (BISA DIEDIT) --}}
                                     <div>
                                         <label for="email" class="mb-1 block text-xs font-semibold text-slate-700">
                                             Email
@@ -411,8 +408,6 @@
         const summary = document.getElementById('validation-summary');
 
         const fields = {
-            name: document.getElementById('name'),
-            npm: document.getElementById('npm'),
             email: document.getElementById('email'),
             current_password: document.getElementById('current_password'),
             password: document.getElementById('password'),
@@ -478,16 +473,6 @@
         function validateField(field) {
             const value = fields[field].value.trim();
 
-            if (field === 'name' && !value) {
-                showError(field, 'Nama lengkap wajib diisi.');
-                return false;
-            }
-
-            if (field === 'npm' && !/^[0-9]{10}$/.test(value)) {
-                showError(field, 'NPM harus terdiri dari tepat 10 angka.');
-                return false;
-            }
-
             if (field === 'email') {
                 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -544,15 +529,6 @@
             clearError(field);
             return true;
         }
-
-        // NPM HANYA BOLEH ANGKA
-        fields.npm.addEventListener('input', function () {
-            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
-
-            if (this.dataset.touched === 'true') {
-                validateField('npm');
-            }
-        });
 
         // VALIDASI SAAT INPUT DAN KELUAR DARI FIELD
         Object.keys(fields).forEach(function (field) {

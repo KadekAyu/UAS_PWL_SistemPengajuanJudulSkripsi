@@ -20,10 +20,9 @@
         html,
         body {
             width: 100%;
-            min-height: 100%;
+            height: 100%;
             margin: 0;
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden;
         }
 
         .form-actions {
@@ -32,11 +31,14 @@
         }
 
         .page-layout {
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .main-content {
+            height: 100vh;
             min-height: 0;
+            overflow: hidden;
         }
 
         .page-content {
@@ -45,9 +47,18 @@
         }
 
         @media (max-width: 767px) {
+            html,
+            body,
+            .page-layout,
+            .main-content {
+                height: auto;
+                overflow: visible;
+            }
+
             .page-content {
                 padding-left: 12px;
                 padding-right: 12px;
+                overflow-y: visible;
             }
 
             .form-grid {
@@ -58,13 +69,13 @@
     </style>
 </head>
 
-<body class="min-h-screen overflow-x-hidden bg-[#E8F5FF] text-slate-800">
+<body class="h-screen overflow-hidden bg-[#E8F5FF] text-slate-800">
 
-    <div class="page-layout flex min-h-screen">
+    <div class="page-layout flex h-screen overflow-hidden">
 
         <x-sidebar-mahasiswa />
 
-        <main class="main-content flex min-w-0 flex-1 flex-col">
+        <main class="main-content flex min-w-0 flex-1 flex-col overflow-hidden">
 
             <x-topbar-mahasiswa>
                 <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
@@ -264,8 +275,16 @@
                             </div>
 
                             @if ($terkunci)
-                                <span class="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
-                                    Terkunci
+                                <span
+                                    aria-disabled="true"
+                                    class="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400"
+                                >
+                                    <span>Pilih file</span>
+
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M12 16V4m-4 4 4-4 4 4"/>
+                                        <path d="M4 16v4h16v-4"/>
+                                    </svg>
                                 </span>
                             @else
                                 <label
@@ -320,7 +339,7 @@
                                     <path d="M22 2 11 13"/>
                                 </svg>
 
-                                <span>{{ $terkunci ? 'Pengajuan Dikunci' : 'Kirim Pengajuan' }}</span>
+                                <span>Kirim Pengajuan</span>
                             </button>
 
                         </div>

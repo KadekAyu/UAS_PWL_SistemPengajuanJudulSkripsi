@@ -1,5 +1,5 @@
 <!-- SIDEBAR MAHASISWA -->
-<aside class="flex w-full flex-col border-r border-sky-100 bg-white md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0">
+<aside class="flex w-full flex-col border-r border-sky-100 bg-white md:h-full md:w-60 md:shrink-0 md:overflow-y-auto">
 
     <!-- LOGO -->
     <div class="px-5 py-5">
@@ -21,9 +21,9 @@
 
         <!-- Menu Dashboard -->
         <a href="{{ route('mahasiswa.dashboard') }}"
-           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
+           class="flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
 
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <rect x="4" y="4" width="6" height="6" rx="1"/>
                 <rect x="14" y="4" width="6" height="6" rx="1"/>
                 <rect x="4" y="14" width="6" height="6" rx="1"/>
@@ -35,9 +35,9 @@
 
         <!-- Menu Pengajuan Judul -->
         <a href="{{ route('mahasiswa.pengajuan.create') }}"
-           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.pengajuan.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
+           class="flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.pengajuan.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
 
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/>
                 <path d="M13 3v7h7M8 15h8M8 18h5"/>
             </svg>
@@ -47,9 +47,9 @@
 
         <!-- Menu Riwayat Pengajuan -->
         <a href="{{ route('mahasiswa.riwayat') }}"
-           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.riwayat') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
+           class="flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.riwayat') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
 
-            <svg class="h-4 w-4"
+            <svg class="h-4 w-4 shrink-0"
                  fill="none"
                  viewBox="0 0 24 24"
                  stroke="currentColor"
@@ -65,35 +65,17 @@
             <span>Riwayat Pengajuan</span>
         </a>
 
-        <!-- Menu Profil Saya -->
-        <a href="{{ route('mahasiswa.profil') }}"
-           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold {{ request()->routeIs('mahasiswa.profil*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} transition">
-
-            <svg class="h-4 w-4"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="1.8">
-                <circle cx="12" cy="8" r="4"/>
-                <path stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M5 21a7 7 0 0 1 14 0"/>
-            </svg>
-
-            <span>Profil Saya</span>
-        </a>
-
     </nav>
 
     <!-- LOGOUT -->
-    <div class="border-t border-slate-100 p-3">
+    <div class="border-t border-slate-100 p-3 md:mt-auto">
         <form action="{{ route('logout') }}" method="POST">
             @csrf
 
             <button type="submit"
                     class="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
 
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M10 17l5-5-5-5M15 12H3"/>
                     <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>
                 </svg>
