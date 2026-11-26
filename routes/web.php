@@ -186,6 +186,14 @@ Route::middleware('auth')
             [KaprodiDashboardController::class, 'pengajuanMasuk']
         )->name('pengajuan.index');
 
+        // HALAMAN DETAIL & PENGESAHAN PENGAJUAN
+        Route::get(
+            '/pengajuan/{pengajuan}',
+            [KaprodiDashboardController::class, 'show']
+        )
+        ->whereNumber('pengajuan')
+        ->name('pengajuan.show');
+
         // HALAMAN RIWAYAT KEPUTUSAN
         Route::get(
             '/riwayat',

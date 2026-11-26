@@ -1,8 +1,9 @@
 @php
     $user = auth()->user();
-    $status = strtolower(trim($pengajuan->status));
+    $status = strtolower(trim((string) $pengajuan->status));
+    $isSudahDisahkanKaprodi = $status === 'acc final';
 
-    $statusClass = match($status) {
+    $statusClass = match ($status) {
         'acc final', 'disahkan', 'disetujui' => 'bg-emerald-50 text-emerald-700',
         'revisi' => 'bg-orange-50 text-orange-700',
         'ditolak' => 'bg-rose-50 text-rose-700',
@@ -10,7 +11,7 @@
         default => 'bg-amber-50 text-amber-700',
     };
 
-    $statusDot = match($status) {
+    $statusDot = match ($status) {
         'acc final', 'disahkan', 'disetujui' => 'bg-emerald-500',
         'revisi' => 'bg-orange-500',
         'ditolak' => 'bg-rose-500',
@@ -177,7 +178,7 @@
                                 <h3 class="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
                                     Abstrak / Latar Belakang
                                 </h3>
-                                <div class="rounded-lg border border-slate-100 bg-slate-50 px-3.5 py-3 text-xs leading-relaxed text-slate-600 whitespace-pre-line">
+                                <div class="whitespace-pre-line rounded-lg border border-slate-100 bg-slate-50 px-3.5 py-3 text-xs leading-relaxed text-slate-600">
                                     {{ $pengajuan->abstrak }}
                                 </div>
                             </div>
@@ -240,15 +241,15 @@
 
                         </section>
 
-                        <!-- SURAT PENGESAHAN -->
-                        @if ($status === 'disetujui')
+                        <!-- SURAT PENGESAHAN (HANYA SETELAH DISAHKAN KAPRODI) -->
+                        @if ($isSudahDisahkanKaprodi)
                             <section class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                                 <div>
                                     <h3 class="text-xs font-bold text-emerald-800">
-                                        Judul Telah Disetujui!
+                                        Judul Telah Disahkan Kaprodi!
                                     </h3>
                                     <p class="mt-1 text-[10px] text-emerald-600">
-                                        Surat pengesahan sudah dapat dicetak.
+                                        Surat pengesahan sudah diterbitkan dan siap diunduh atau dicetak.
                                     </p>
                                 </div>
 

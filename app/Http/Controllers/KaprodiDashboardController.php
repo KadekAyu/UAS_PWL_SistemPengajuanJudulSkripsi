@@ -13,13 +13,11 @@ class KaprodiDashboardController extends Controller
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
 
-        $approvalStatuses = ['ACC Dospem', 'ACC Dosen', 'Menunggu Persetujuan Kaprodi'];
-
         $pengajuanMasuk = DB::table('pengajuan_judul as pengajuan')
             ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
             ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
             ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
-            ->whereIn('pengajuan.status', $approvalStatuses)
+            ->whereRaw('LOWER(pengajuan.status) = ?', ['disetujui'])
             ->select([
                 'pengajuan.id',
                 'pengajuan.judul',
@@ -40,20 +38,52 @@ class KaprodiDashboardController extends Controller
         return view('kaprodi.pengajuan.index', compact('pengajuanMasuk'));
     }
 
+    public function show(Request $request, int $pengajuan): View
+    {
+        abort_unless($request->user()->role === 'kaprodi', 403);
+
+        $detail = DB::table('pengajuan_judul as pengajuan')
+            ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
+            ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
+            ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
+            ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
+            ->where('pengajuan.id', $pengajuan)
+            ->select([
+                'pengajuan.id',
+                'pengajuan.judul',
+                'pengajuan.abstrak',
+                'pengajuan.file_proposal',
+                'pengajuan.status',
+                'pengajuan.created_at',
+                'pengajuan.updated_at',
+                'mahasiswa.name as nama_mahasiswa',
+                'mahasiswa.npm',
+                'dospem_1.name as nama_dospem_1',
+                'dospem_2.name as nama_dospem_2',
+                'surat.nomor_sk',
+                'surat.tanggal_disetujui',
+            ])
+            ->first();
+
+        abort_if($detail === null, 404);
+
+        return view('kaprodi.pengajuan.show', compact('detail'));
+    }
+
     public function riwayatKeputusan(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
 
         $validated = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'in:ACC Final,Ditolak'],
         ]);
 
         $baseQuery = DB::table('pengajuan_judul as pengajuan')
             ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
+            ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
+            ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
             ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
-            ->leftJoin('users as dospem_final', 'dospem_final.id', '=', 'pengajuan.dospem_final_id')
-            ->whereIn('pengajuan.status', ['ACC Final', 'Ditolak']);
+            ->whereRaw('LOWER(pengajuan.status) = ?', ['acc final']);
 
         if (!empty($validated['q'])) {
             $keyword = $validated['q'];
@@ -61,12 +91,9 @@ class KaprodiDashboardController extends Controller
             $baseQuery->where(function ($query) use ($keyword): void {
                 $query->where('mahasiswa.name', 'like', '%' . $keyword . '%')
                     ->orWhere('mahasiswa.npm', 'like', '%' . $keyword . '%')
-                    ->orWhere('pengajuan.judul', 'like', '%' . $keyword . '%');
+                    ->orWhere('pengajuan.judul', 'like', '%' . $keyword . '%')
+                    ->orWhere('surat.nomor_sk', 'like', '%' . $keyword . '%');
             });
-        }
-
-        if (!empty($validated['status'])) {
-            $baseQuery->where('pengajuan.status', $validated['status']);
         }
 
         $riwayat = $baseQuery
@@ -77,21 +104,16 @@ class KaprodiDashboardController extends Controller
                 'pengajuan.updated_at',
                 'mahasiswa.name as nama_mahasiswa',
                 'mahasiswa.npm',
+                'dospem_1.name as nama_dospem_1',
+                'dospem_2.name as nama_dospem_2',
                 'surat.nomor_sk',
                 'surat.tanggal_disetujui',
-                'dospem_final.name as nama_dospem_final',
             ])
             ->latest('pengajuan.updated_at')
             ->paginate(10)
             ->withQueryString();
 
-        $statistics = [
-            'total' => DB::table('pengajuan_judul')->whereIn('status', ['ACC Final', 'Ditolak'])->count(),
-            'disahkan' => DB::table('pengajuan_judul')->where('status', 'ACC Final')->count(),
-            'ditolak' => DB::table('pengajuan_judul')->where('status', 'Ditolak')->count(),
-        ];
-
-        return view('kaprodi.riwayat', compact('riwayat', 'statistics'));
+        return view('kaprodi.riwayat', compact('riwayat'));
     }
 
     public function index(Request $request): View
@@ -103,17 +125,22 @@ class KaprodiDashboardController extends Controller
             ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
             ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id');
 
-        $approvalStatuses = ['ACC Dospem', 'ACC Dosen', 'Menunggu Persetujuan Kaprodi'];
+        $menungguCount = DB::table('pengajuan_judul')
+            ->whereRaw('LOWER(status) = ?', ['disetujui'])
+            ->count();
+
+        $disahkanCount = DB::table('pengajuan_judul')
+            ->whereRaw('LOWER(status) = ?', ['acc final'])
+            ->count();
 
         $statistics = [
-            'total' => DB::table('pengajuan_judul')->count(),
-            'menunggu' => DB::table('pengajuan_judul')->whereIn('status', $approvalStatuses)->count(),
-            'disahkan' => DB::table('pengajuan_judul')->where('status', 'ACC Final')->count(),
-            'ditolak' => DB::table('pengajuan_judul')->where('status', 'Ditolak')->count(),
+            'menunggu' => $menungguCount,
+            'disahkan' => $disahkanCount,
+            'total_diproses' => $menungguCount + $disahkanCount,
         ];
 
         $menungguPengesahan = (clone $baseQuery)
-            ->whereIn('pengajuan.status', $approvalStatuses)
+            ->whereRaw('LOWER(pengajuan.status) = ?', ['disetujui'])
             ->select([
                 'pengajuan.id',
                 'pengajuan.judul',
@@ -133,7 +160,7 @@ class KaprodiDashboardController extends Controller
 
         $riwayat = (clone $baseQuery)
             ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
-            ->whereIn('pengajuan.status', ['ACC Final', 'Ditolak'])
+            ->whereRaw('LOWER(pengajuan.status) = ?', ['acc final'])
             ->select([
                 'pengajuan.id',
                 'pengajuan.judul',
@@ -141,6 +168,8 @@ class KaprodiDashboardController extends Controller
                 'pengajuan.updated_at',
                 'mahasiswa.name as nama_mahasiswa',
                 'mahasiswa.npm',
+                'dospem_1.name as nama_dospem_1',
+                'dospem_2.name as nama_dospem_2',
                 'surat.nomor_sk',
             ])
             ->latest('pengajuan.updated_at')
@@ -154,11 +183,7 @@ class KaprodiDashboardController extends Controller
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
 
-        $validated = $request->validate([
-            'dospem_final_id' => ['required', 'integer'],
-        ]);
-
-        DB::transaction(function () use ($validated, $pengajuan, $request): void {
+        DB::transaction(function () use ($pengajuan, $request): void {
             $data = DB::table('pengajuan_judul')
                 ->where('id', $pengajuan)
                 ->lockForUpdate()
@@ -166,14 +191,9 @@ class KaprodiDashboardController extends Controller
 
             abort_if($data === null, 404);
             abort_unless(
-                in_array($data->status, ['ACC Dospem', 'ACC Dosen', 'Menunggu Persetujuan Kaprodi'], true),
+                strtolower((string) $data->status) === 'disetujui',
                 422,
-                'Pengajuan ini belum siap disahkan.'
-            );
-            abort_unless(
-                in_array((int) $validated['dospem_final_id'], [(int) $data->dospem_1_id, (int) $data->dospem_2_id], true),
-                422,
-                'Dospem final harus dipilih dari dosen yang diusulkan.'
+                'Pengajuan ini belum disetujui kedua dosen pembimbing.'
             );
 
             $nomorSk = sprintf('SK/%s/%06d', now()->format('Y'), $data->id);
@@ -181,7 +201,6 @@ class KaprodiDashboardController extends Controller
             DB::table('pengajuan_judul')
                 ->where('id', $data->id)
                 ->update([
-                    'dospem_final_id' => $validated['dospem_final_id'],
                     'status' => 'ACC Final',
                     'updated_at' => now(),
                 ]);

@@ -305,7 +305,7 @@ class PengajuanJudulController extends Controller
             );
     }
 
-    // CETAK SURAT PENGESAHAN
+    // CETAK SURAT PENGESAHAN (HANYA SETELAH DISAHKAN KAPRODI)
     public function cetakSurat($id)
     {
         $user = Auth::user();
@@ -325,17 +325,34 @@ class PengajuanJudulController extends Controller
                 '=',
                 'dospem2.id'
             )
+            ->leftJoin(
+                'users as dospem_final',
+                'pengajuan_judul.dospem_final_id',
+                '=',
+                'dospem_final.id'
+            )
+            ->leftJoin(
+                'surat_pengesahan as surat',
+                'surat.pengajuan_id',
+                '=',
+                'pengajuan_judul.id'
+            )
             ->select(
                 'pengajuan_judul.*',
                 'dospem1.name as dospem_1_nama',
-                'dospem2.name as dospem_2_nama'
+                'dospem2.name as dospem_2_nama',
+                'dospem_final.name as dospem_final_nama',
+                'surat.nomor_sk',
+                'surat.tanggal_disetujui'
             )
             ->where('pengajuan_judul.id', $id)
             ->where('pengajuan_judul.mahasiswa_id', $user->id)
             ->first();
 
-        if (!$pengajuan || $pengajuan->status !== 'disetujui') {
-            abort(403, 'Surat pengesahan belum tersedia.');
+        $isAccFinal = $pengajuan && strtolower(trim((string) $pengajuan->status)) === 'acc final';
+
+        if (!$isAccFinal) {
+            abort(403, 'Surat pengesahan belum tersedia. Pengajuan harus disahkan oleh Kaprodi terlebih dahulu.');
         }
 
         return view('mahasiswa.pengajuan.surat-pdf', compact(
