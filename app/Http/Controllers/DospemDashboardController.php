@@ -38,6 +38,7 @@ class DospemDashboardController extends Controller
         $pengajuanMenunggu = $pengajuan->whereIn('status', [
             'Menunggu',
             'Pending',
+            'menunggu',
             'Menunggu Persetujuan Dospem',
         ])->count();
 
@@ -46,13 +47,18 @@ class DospemDashboardController extends Controller
             'ACC Dosen',
             'Menunggu Persetujuan Kaprodi',
             'ACC Final',
+            'disetujui',
         ])->count();
 
-        $pengajuanDitolak = $pengajuan->where('status', 'Ditolak')->count();
+        $pengajuanDitolak = $pengajuan->whereIn('status', [
+            'Ditolak',
+            'ditolak',
+        ])->count();
 
         $pengajuanMasuk = $pengajuan->whereIn('status', [
             'Menunggu',
             'Pending',
+            'menunggu',
             'Menunggu Persetujuan Dospem',
         ]);
 
@@ -87,6 +93,7 @@ class DospemDashboardController extends Controller
             ->whereIn('p.status', [
                 'Menunggu',
                 'Pending',
+                'menunggu',
                 'Menunggu Persetujuan Dospem',
             ])
             ->select(
@@ -135,10 +142,21 @@ class DospemDashboardController extends Controller
         $proposalTersedia = $pengajuan->file_proposal
             && Storage::disk('public')->exists($pengajuan->file_proposal);
 
+        $catatanRevisi = DB::table('catatan_revisi as cr')
+            ->join('users as dosen', 'cr.dosen_id', '=', 'dosen.id')
+            ->where('cr.pengajuan_id', $id)
+            ->select(
+                'cr.*',
+                'dosen.name as nama_dosen'
+            )
+            ->latest('cr.created_at')
+            ->get();
+
         return view('dospem.pengajuan.detail', compact(
             'user',
             'pengajuan',
-            'proposalTersedia'
+            'proposalTersedia',
+            'catatanRevisi'
         ));
     }
 
@@ -172,18 +190,32 @@ class DospemDashboardController extends Controller
 
         abort_unless($pengajuan, 404);
 
-        DB::table('catatan_revisi')->updateOrInsert(
-            [
+        // Petakan keputusan review ke nilai status yang sesuai di alur aplikasi
+        $statusPengajuan = match ($validated['status']) {
+            'ACC' => 'disetujui',
+            'Revisi' => 'revisi',
+            'Ditolak' => 'ditolak',
+        };
+
+        $now = now();
+
+        DB::transaction(function () use ($id, $user, $validated, $statusPengajuan, $now) {
+            DB::table('catatan_revisi')->insert([
                 'pengajuan_id' => $id,
                 'dosen_id' => $user->id,
-            ],
-            [
-                'catatan' => $validated['catatan'] ?? null,
+                'catatan' => $validated['catatan'] ?? '-',
                 'status' => $validated['status'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+
+            DB::table('pengajuan_judul')
+                ->where('id', $id)
+                ->update([
+                    'status' => $statusPengajuan,
+                    'updated_at' => $now,
+                ]);
+        });
 
         return redirect()
             ->route('dospem.pengajuan.detail', $id)
@@ -257,7 +289,7 @@ class DospemDashboardController extends Controller
                 $query->where('p.dospem_1_id', $user->id)
                     ->orWhere('p.dospem_2_id', $user->id);
             })
-            ->where('p.status', 'ACC Final')
+            ->whereIn('p.status', ['ACC Final', 'disetujui'])
             ->select(
                 'p.*',
                 'mahasiswa.name as nama_mahasiswa',

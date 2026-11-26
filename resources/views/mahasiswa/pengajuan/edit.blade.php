@@ -1,8 +1,15 @@
 @php
     $user = auth()->user();
 
-    $dospem1Terpilih = old('dospem_1_id', $pengajuan->dospem_1_id);
-    $dospem2Terpilih = old('dospem_2_id', $pengajuan->dospem_2_id);
+    $namaDospem1 = $pengajuan->dospem_1_nama
+        ?? $pengajuan->nama_dospem_1
+        ?? optional($daftarDosen->firstWhere('id', $pengajuan->dospem_1_id))->name
+        ?? '-';
+
+    $namaDospem2 = $pengajuan->dospem_2_nama
+        ?? $pengajuan->nama_dospem_2
+        ?? optional($daftarDosen->firstWhere('id', $pengajuan->dospem_2_id))->name
+        ?? '-';
 @endphp
 
 <!DOCTYPE html>
@@ -46,7 +53,7 @@
                         Form Revisi Pengajuan Judul
                     </h1>
                     <p class="mt-1 text-xs text-slate-500">
-                        Perbarui informasi judul, dosen pembimbing, dan berkas proposal skripsi.
+                        Perbarui informasi judul, abstrak, dan berkas proposal skripsi sesuai catatan revisi.
                     </p>
                 </div>
 
@@ -78,6 +85,9 @@
                 >
                     @csrf
                     @method('PUT')
+
+                    <input type="hidden" name="dospem_1_id" value="{{ $pengajuan->dospem_1_id }}">
+                    <input type="hidden" name="dospem_2_id" value="{{ $pengajuan->dospem_2_id }}">
 
                     <!-- JUDUL -->
                     <div>
@@ -122,97 +132,41 @@
                         @enderror
                     </div>
 
-                    <!-- DOSEN PEMBIMBING -->
+                    <!-- DOSEN PEMBIMBING (TERKUNCI DARI PENGAJUAN AWAL) -->
                     <div class="border-t border-slate-100 pt-5 space-y-4">
 
                         <div>
                             <h3 class="text-sm font-bold text-slate-800">
-                                Pilihan Dosen Pembimbing
+                                Dosen Pembimbing
                             </h3>
                             <p class="mt-1 text-xs text-slate-500">
-                                Pilih dua dosen pembimbing sesuai dengan kebutuhan penelitian.
+                                Dosen pembimbing mengikuti pengajuan awal dan tidak diubah saat revisi.
                             </p>
                         </div>
 
-                        @if ($daftarDosen->isEmpty())
-                            <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-700">
-                                Belum ada data dosen yang tersedia untuk dipilih.
-                            </div>
-                        @else
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                                <!-- DOSPEM 1 -->
-                                <div>
-                                    <label for="dospem_1_id" class="block text-xs font-bold text-slate-600 mb-1.5">
-                                        Dosen Pembimbing 1
-                                        <span class="text-rose-500">*</span>
-                                    </label>
-
-                                    <select
-                                        name="dospem_1_id"
-                                        id="dospem_1_id"
-                                        required
-                                        class="w-full rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                                    >
-                                        <option value="">-- Pilih Dosen Pembimbing 1 --</option>
-
-                                        @foreach ($daftarDosen as $dosen)
-                                            <option
-                                                value="{{ $dosen->id }}"
-                                                {{ (string) $dospem1Terpilih === (string) $dosen->id ? 'selected' : '' }}
-                                            >
-                                                {{ $dosen->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-
-                                    @error('dospem_1_id')
-                                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- DOSPEM 2 -->
-                                <div>
-                                    <label for="dospem_2_id" class="block text-xs font-bold text-slate-600 mb-1.5">
-                                        Dosen Pembimbing 2
-                                        <span class="text-rose-500">*</span>
-                                    </label>
-
-                                    <select
-                                        name="dospem_2_id"
-                                        id="dospem_2_id"
-                                        required
-                                        class="w-full rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                                    >
-                                        <option value="">-- Pilih Dosen Pembimbing 2 --</option>
-
-                                        @foreach ($daftarDosen as $dosen)
-                                            <option
-                                                value="{{ $dosen->id }}"
-                                                {{ (string) $dospem2Terpilih === (string) $dosen->id ? 'selected' : '' }}
-                                            >
-                                                {{ $dosen->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-
-                                    @error('dospem_2_id')
-                                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
+                            <!-- DOSPEM 1 -->
+                            <div class="rounded-xl border border-sky-100 bg-sky-50/50 p-3.5">
+                                <p class="text-[11px] font-bold text-slate-500 mb-1">
+                                    Dosen Pembimbing 1
+                                </p>
+                                <p class="text-sm font-semibold text-slate-800">
+                                    {{ $namaDospem1 }}
+                                </p>
                             </div>
 
-                            <p id="dospem-warning" class="hidden text-xs text-red-500">
-                                Dosen Pembimbing 1 dan 2 tidak boleh sama.
-                            </p>
+                            <!-- DOSPEM 2 -->
+                            <div class="rounded-xl border border-sky-100 bg-sky-50/50 p-3.5">
+                                <p class="text-[11px] font-bold text-slate-500 mb-1">
+                                    Dosen Pembimbing 2
+                                </p>
+                                <p class="text-sm font-semibold text-slate-800">
+                                    {{ $namaDospem2 }}
+                                </p>
+                            </div>
 
-                            <p class="text-[11px] text-slate-400">
-                                Pastikan dosen pembimbing 1 dan 2 merupakan dua dosen yang berbeda.
-                            </p>
-
-                        @endif
+                        </div>
                     </div>
 
                     <!-- UPLOAD PROPOSAL -->
@@ -310,36 +264,9 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const dospem1 = document.getElementById('dospem_1_id');
-        const dospem2 = document.getElementById('dospem_2_id');
-        const warning = document.getElementById('dospem-warning');
-        const submitButton = document.getElementById('submit-button');
         const fileInput = document.getElementById('file_proposal');
         const fileName = document.getElementById('file-name');
 
-        // Mencegah mahasiswa memilih dosen yang sama
-        function cekDosen() {
-            if (!dospem1 || !dospem2) return true;
-
-            const sama = dospem1.value !== '' && dospem1.value === dospem2.value;
-
-            warning.classList.toggle('hidden', !sama);
-            submitButton.disabled = sama;
-
-            submitButton.classList.toggle('opacity-50', sama);
-            submitButton.classList.toggle('cursor-not-allowed', sama);
-
-            return !sama;
-        }
-
-        if (dospem1 && dospem2) {
-            dospem1.addEventListener('change', cekDosen);
-            dospem2.addEventListener('change', cekDosen);
-
-            cekDosen();
-        }
-
-        // Menampilkan nama file yang dipilih
         if (fileInput) {
             fileInput.addEventListener('change', function () {
                 const file = this.files[0];

@@ -30,6 +30,8 @@
         } else {
             $proposalUkuranText = number_format($proposalUkuran / 1024, 2) . ' KB';
         }
+
+        $riwayatCatatan = $catatanRevisi ?? collect();
     @endphp
 </head>
 
@@ -220,6 +222,45 @@
                                 </div>
 
                             </div>
+                        </section>
+
+                        <!-- RIWAYAT CATATAN REVISI -->
+                        <section class="detail-card">
+
+                            <div class="section-heading">
+                                <div class="section-icon">
+                                    <i data-lucide="history" class="h-4 w-4"></i>
+                                </div>
+
+                                <h2 class="section-title">Riwayat Catatan Revisi</h2>
+                            </div>
+
+                            @if (count($riwayatCatatan) > 0)
+                                <div class="space-y-2.5">
+                                    @foreach ($riwayatCatatan as $item)
+                                        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+                                            <div class="flex items-center justify-between gap-2 text-[11px]">
+                                                <span class="font-semibold text-slate-700">
+                                                    {{ $item->nama_dosen ?? ($item->dosen_nama ?? 'Dosen') }}
+                                                </span>
+                                                @if (!empty($item->created_at))
+                                                    <span class="text-[10px] text-slate-400">
+                                                        {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y H:i') }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <p class="mt-1 whitespace-pre-line break-words text-xs text-slate-600">
+                                                {{ $item->catatan ?? ($item->catatan_revisi ?? ($item->komentar ?? '-')) }}
+                                            </p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-xs text-slate-400">
+                                    Belum ada catatan revisi untuk pengajuan ini.
+                                </p>
+                            @endif
+
                         </section>
 
                     </div>
