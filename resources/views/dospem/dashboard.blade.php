@@ -100,10 +100,10 @@
                 <section class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
                     @foreach ([
-                        ['label' => 'Total Pengajuan', 'value' => $statistics['total'] ?? 0, 'tone' => 'sky', 'icon' => 'document'],
-                        ['label' => 'Menunggu Review', 'value' => $statistics['pending'] ?? 0, 'tone' => 'amber', 'icon' => 'clock'],
-                        ['label' => 'Sudah ACC', 'value' => $statistics['disetujui'] ?? 0, 'tone' => 'emerald', 'icon' => 'check'],
-                        ['label' => 'Revisi / Ditolak', 'value' => ($statistics['revisi'] ?? 0) + ($statistics['ditolak'] ?? 0), 'tone' => 'rose', 'icon' => 'x'],
+                        ['label' => 'Total Pengajuan', 'value' => $totalPengajuan ?? 0, 'tone' => 'sky', 'icon' => 'document'],
+                        ['label' => 'Menunggu Review', 'value' => $pengajuanMenunggu ?? 0, 'tone' => 'amber', 'icon' => 'clock'],
+                        ['label' => 'Sudah ACC', 'value' => $pengajuanDisetujui ?? 0, 'tone' => 'emerald', 'icon' => 'check'],
+                        ['label' => 'Revisi / Ditolak', 'value' => $pengajuan->whereIn('status', ['Revisi', 'revisi', 'Ditolak', 'ditolak'])->count(), 'tone' => 'rose', 'icon' => 'x'],
                     ] as $card)
 
                         <article class="rounded-xl border border-sky-100 bg-white px-4 py-3 shadow-sm transition hover:shadow-md">
@@ -208,7 +208,7 @@
                                                 </p>
 
                                                 <p class="mt-1 text-[10px] text-slate-400">
-                                                    {{ $item->npm_mahasiswa ?? '-' }}
+                                                    {{ $item->npm ?? '-' }}
                                                 </p>
                                             </td>
 
@@ -253,7 +253,7 @@
                 </section>
 
                 <!-- RIWAYAT REVIEW -->
-                <section class="overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
+                <section class="overflow-hidden rounded-xl border border-sky-100 bg-white pb-8 shadow-sm">
 
                     <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
 
@@ -291,7 +291,7 @@
                                     @foreach ($riwayat as $item)
                                         <tr class="transition hover:bg-sky-50/50">
 
-                                            <td class="px-5 py-3 text-slate-600">
+                                            <td class="px-5 py-4 text-slate-600">
                                                 {{ $loop->iteration }}
                                             </td>
 

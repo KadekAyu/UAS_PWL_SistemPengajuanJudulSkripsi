@@ -41,7 +41,7 @@
                     </h1>
 
                     <p class="mt-1 text-xs text-slate-500">
-                        Pantau pengajuan yang sudah di-ACC dua pembimbing dan sahkan judul skripsi mahasiswa.
+                        Pantau pengajuan judul skripsi, lakukan penunjukan dosen pembimbing, dan sahkan judul setelah mendapatkan persetujuan dosen.
                     </p>
 
                 </header>
@@ -100,7 +100,7 @@
                             </h2>
 
                             <p class="mt-1 text-xs text-slate-500">
-                                Judul yang telah disetujui kedua dosen pembimbing dan siap disahkan.
+                                Daftar pengajuan mahasiswa yang menunggu penunjukan dosen atau pengesahan akhir.
                             </p>
                         </div>
 

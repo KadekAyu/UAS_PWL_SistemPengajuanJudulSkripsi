@@ -20,10 +20,12 @@
 
     <div class="min-h-screen md:flex">
 
+        <!-- Sidebar: navigasi menu Dosen Pembimbing. -->
         <x-sidebar-dospem />
 
         <main class="min-w-0 flex-1">
 
+            <!-- Topbar: breadcrumb halaman dan identitas dosen yang sedang login. -->
             <x-topbar-dospem>
                 <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +69,7 @@
                     </p>
                 </header>
 
-                <!-- STATISTIK -->
+                <!-- Statistik jumlah mahasiswa yang sudah disahkan sebagai bimbingan final. -->
                 <section class="mb-5">
                     <article class="flex w-full items-center justify-between rounded-xl border border-sky-100 bg-white px-5 py-4 shadow-sm sm:w-72">
 
@@ -102,7 +104,7 @@
                     </article>
                 </section>
 
-                <!-- DAFTAR MAHASISWA -->
+                <!-- Daftar mahasiswa berdasarkan penetapan final Kaprodi. -->
                 <section class="w-full overflow-hidden rounded-xl border border-sky-100 bg-white shadow-sm">
 
                     <!-- HEADER TABEL -->
@@ -192,7 +194,7 @@
                                                 </p>
 
                                                 <p class="mt-1 truncate text-[10px] text-slate-400">
-                                                    NPM: {{ $mahasiswa->npm_mahasiswa ?? '-' }}
+                                                    NPM: {{ $mahasiswa->npm ?? '-' }}
                                                 </p>
                                             </div>
                                         </td>
@@ -216,8 +218,9 @@
                                             </p>
                                         </td>
 
+                                        <!-- Tanggal pengesahan berasal dari surat yang diterbitkan Kaprodi. -->
                                         <td class="px-3 py-2 align-middle whitespace-nowrap text-slate-600">
-                                            {{ $mahasiswa->tanggal_disetujui
+                                            {{ !empty($mahasiswa->tanggal_disetujui)
                                                 ? \Carbon\Carbon::parse($mahasiswa->tanggal_disetujui)->format('d M Y')
                                                 : '-' }}
                                         </td>
@@ -282,7 +285,7 @@
         </main>
     </div>
 
-    <!-- SEARCH SCRIPT -->
+    <!-- Pencarian lokal untuk menyaring tabel berdasarkan nama atau NPM. -->
     <script>
         const searchInput = document.getElementById('searchMahasiswa');
         const rows = document.querySelectorAll('.baris-mahasiswa');

@@ -70,7 +70,7 @@
                 </h1>
 
                 <p class="mt-1 text-xs text-slate-500">
-                    Daftar pengajuan judul skripsi mahasiswa yang memilih Anda sebagai dosen pembimbing.
+                    Daftar pengajuan judul skripsi mahasiswa yang ditugaskan oleh Kaprodi untuk Anda review.
                 </p>
             </header>
 
@@ -126,7 +126,7 @@
                                                 </p>
 
                                                 <p class="mt-1 text-[10px] text-slate-400">
-                                                    {{ $item->npm_mahasiswa ?? '-' }}
+                                                    {{ $item->npm ?? '-' }}
                                                 </p>
                                             </td>
 

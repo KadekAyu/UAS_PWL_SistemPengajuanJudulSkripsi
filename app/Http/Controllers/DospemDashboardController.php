@@ -19,10 +19,8 @@ class DospemDashboardController extends Controller
             ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
             ->leftJoin('users as dospem1', 'p.dospem_1_id', '=', 'dospem1.id')
             ->leftJoin('users as dospem2', 'p.dospem_2_id', '=', 'dospem2.id')
-            ->where(function ($query) use ($user) {
-                $query->where('p.dospem_1_id', $user->id)
-                    ->orWhere('p.dospem_2_id', $user->id);
-            })
+            // Hanya menampilkan pengajuan yang ditugaskan Kaprodi.
+            ->where('p.dospem_final_id', $user->id)
             ->select(
                 'p.*',
                 'mahasiswa.name as nama_mahasiswa',
@@ -35,11 +33,10 @@ class DospemDashboardController extends Controller
 
         $totalPengajuan = $pengajuan->count();
 
+        // Menghitung pengajuan yang sudah ditugaskan Kaprodi
+        // dan masih menunggu review dosen.
         $pengajuanMenunggu = $pengajuan->whereIn('status', [
-            'Menunggu',
-            'Pending',
-            'menunggu',
-            'Menunggu Persetujuan Dospem',
+            'Menunggu Review Dospem',
         ])->count();
 
         $pengajuanDisetujui = $pengajuan->whereIn('status', [
@@ -55,14 +52,24 @@ class DospemDashboardController extends Controller
             'ditolak',
         ])->count();
 
+        // Pengajuan yang telah ditugaskan Kaprodi
+        // dan belum mendapatkan keputusan review Dospem.
         $pengajuanMasuk = $pengajuan->whereIn('status', [
-            'Menunggu',
-            'Pending',
-            'menunggu',
-            'Menunggu Persetujuan Dospem',
+            'Menunggu Review Dospem',
         ]);
-
-        $riwayat = collect();
+        $riwayat = DB::table('catatan_revisi as cr')
+        ->join('pengajuan_judul as p', 'cr.pengajuan_id', '=', 'p.id')
+        ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
+        ->where('cr.dosen_id', $user->id)
+        ->select(
+            'cr.*',
+            'p.judul',
+            'mahasiswa.name as nama_mahasiswa',
+            'mahasiswa.npm'
+        )
+        ->latest('cr.created_at')
+        ->limit(5)
+        ->get();
 
         return view('dospem.dashboard', compact(
             'user',
@@ -86,16 +93,9 @@ class DospemDashboardController extends Controller
             ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
             ->leftJoin('users as dospem1', 'p.dospem_1_id', '=', 'dospem1.id')
             ->leftJoin('users as dospem2', 'p.dospem_2_id', '=', 'dospem2.id')
-            ->where(function ($query) use ($user) {
-                $query->where('p.dospem_1_id', $user->id)
-                    ->orWhere('p.dospem_2_id', $user->id);
-            })
-            ->whereIn('p.status', [
-                'Menunggu',
-                'Pending',
-                'menunggu',
-                'Menunggu Persetujuan Dospem',
-            ])
+            // Hanya dosen yang ditunjuk Kaprodi yang menerima pengajuan.
+            ->where('p.dospem_final_id', $user->id)
+            ->where('p.status', 'Menunggu Review Dospem')
             ->select(
                 'p.*',
                 'mahasiswa.name as nama_mahasiswa',
@@ -123,10 +123,7 @@ class DospemDashboardController extends Controller
             ->leftJoin('users as dospem1', 'p.dospem_1_id', '=', 'dospem1.id')
             ->leftJoin('users as dospem2', 'p.dospem_2_id', '=', 'dospem2.id')
             ->where('p.id', $id)
-            ->where(function ($query) use ($user) {
-                $query->where('p.dospem_1_id', $user->id)
-                    ->orWhere('p.dospem_2_id', $user->id);
-            })
+            ->where('p.dospem_final_id', $user->id)
             ->select(
                 'p.*',
                 'mahasiswa.name as nama_mahasiswa',
@@ -180,19 +177,18 @@ class DospemDashboardController extends Controller
             'catatan.string' => 'Catatan review harus berupa teks.',
         ]);
 
+        // Hanya dosen yang ditunjuk Kaprodi yang boleh melakukan review.
         $pengajuan = DB::table('pengajuan_judul')
             ->where('id', $id)
-            ->where(function ($query) use ($user) {
-                $query->where('dospem_1_id', $user->id)
-                    ->orWhere('dospem_2_id', $user->id);
-            })
+            ->where('dospem_final_id', $user->id)
+            ->where('status', 'Menunggu Review Dospem')
             ->first();
 
         abort_unless($pengajuan, 404);
 
-        // Petakan keputusan review ke nilai status yang sesuai di alur aplikasi
+        // Menyesuaikan keputusan review dengan alur pengajuan ke Kaprodi.
         $statusPengajuan = match ($validated['status']) {
-            'ACC' => 'disetujui',
+            'ACC' => 'ACC Dospem',
             'Revisi' => 'revisi',
             'Ditolak' => 'ditolak',
         };
@@ -228,13 +224,11 @@ class DospemDashboardController extends Controller
 
         abort_unless($user && $user->role === 'dospem', 403);
 
-        $pengajuan = DB::table('pengajuan_judul')
-            ->where('id', $id)
-            ->where(function ($query) use ($user) {
-                $query->where('dospem_1_id', $user->id)
-                    ->orWhere('dospem_2_id', $user->id);
-            })
-            ->first();
+       // Hanya dosen yang ditunjuk Kaprodi yang boleh melihat proposal.
+       $pengajuan = DB::table('pengajuan_judul')
+           ->where('id', $id)
+           ->where('dospem_final_id', $user->id)
+           ->first();
 
         abort_unless($pengajuan, 404);
 
@@ -282,24 +276,24 @@ class DospemDashboardController extends Controller
 
         abort_unless($user && $user->role === 'dospem', 403);
 
+        // Mahasiswa bimbingan resmi: sudah disahkan Kaprodi dan dosen ini dipilih sebagai pembimbing final.
         $mahasiswaBimbingan = DB::table('pengajuan_judul as p')
             ->join('users as mahasiswa', 'p.mahasiswa_id', '=', 'mahasiswa.id')
-            ->leftJoin('surat_pengesahan as sp', 'p.id', '=', 'sp.pengajuan_id')
-            ->where(function ($query) use ($user) {
-                $query->where('p.dospem_1_id', $user->id)
-                    ->orWhere('p.dospem_2_id', $user->id);
-            })
-            ->whereIn('p.status', ['ACC Final', 'disetujui'])
+            ->join('surat_pengesahan as sp', 'p.id', '=', 'sp.pengajuan_id')
+            ->where('p.dospem_final_id', $user->id)
+            ->where('p.status', 'ACC Final')
             ->select(
                 'p.*',
                 'mahasiswa.name as nama_mahasiswa',
                 'mahasiswa.npm',
                 'mahasiswa.email',
-                'sp.nomor_sk'
+                'sp.nomor_sk',
+                'sp.tanggal_disetujui'
             )
-            ->latest('p.updated_at')
+            ->latest('sp.tanggal_disetujui')
             ->get()
             ->map(function ($item) use ($user) {
+                // Posisi dosen pada daftar calon pembimbing yang dipilih mahasiswa.
                 $item->posisi_dospem = $item->dospem_1_id == $user->id
                     ? 'Dosen Pembimbing 1'
                     : 'Dosen Pembimbing 2';

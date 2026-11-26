@@ -5,19 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class KaprodiDashboardController extends Controller
 {
+    // =====================================
+    // HALAMAN PENGAJUAN MASUK
+    // =====================================
     public function pengajuanMasuk(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
+
+        // Pengajuan baru dan pengajuan yang sudah ACC Dospem.
+        $approvalStatuses = [
+            'menunggu',
+            'ACC Dospem',
+            'ACC Dosen',
+        ];
 
         $pengajuanMasuk = DB::table('pengajuan_judul as pengajuan')
             ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
             ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
             ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
-            ->whereRaw('LOWER(pengajuan.status) = ?', ['disetujui'])
+            ->whereIn('pengajuan.status', $approvalStatuses)
             ->select([
                 'pengajuan.id',
                 'pengajuan.judul',
@@ -35,9 +46,21 @@ class KaprodiDashboardController extends Controller
             ->latest('pengajuan.updated_at')
             ->get();
 
-        return view('kaprodi.pengajuan.index', compact('pengajuanMasuk'));
+        // Daftar seluruh dosen yang dapat ditunjuk Kaprodi.
+        $daftarDosen = DB::table('users')
+            ->where('role', 'dospem')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('kaprodi.pengajuan.index', compact(
+            'pengajuanMasuk',
+            'daftarDosen'
+        ));
     }
 
+    // =====================================
+    // DETAIL PENGAJUAN
+    // =====================================
     public function show(Request $request, int $pengajuan): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
@@ -46,7 +69,12 @@ class KaprodiDashboardController extends Controller
             ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
             ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
             ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
-            ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
+            ->leftJoin(
+                'surat_pengesahan as surat',
+                'surat.pengajuan_id',
+                '=',
+                'pengajuan.id'
+            )
             ->where('pengajuan.id', $pengajuan)
             ->select([
                 'pengajuan.id',
@@ -70,6 +98,9 @@ class KaprodiDashboardController extends Controller
         return view('kaprodi.pengajuan.show', compact('detail'));
     }
 
+    // =====================================
+    // RIWAYAT KEPUTUSAN KAPRODI
+    // =====================================
     public function riwayatKeputusan(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
@@ -82,8 +113,13 @@ class KaprodiDashboardController extends Controller
             ->join('users as mahasiswa', 'mahasiswa.id', '=', 'pengajuan.mahasiswa_id')
             ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
             ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id')
-            ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
-            ->whereRaw('LOWER(pengajuan.status) = ?', ['acc final']);
+            ->leftJoin(
+                'surat_pengesahan as surat',
+                'surat.pengajuan_id',
+                '=',
+                'pengajuan.id'
+            )
+            ->where('pengajuan.status', 'ACC Final');
 
         if (!empty($validated['q'])) {
             $keyword = $validated['q'];
@@ -116,6 +152,9 @@ class KaprodiDashboardController extends Controller
         return view('kaprodi.riwayat', compact('riwayat'));
     }
 
+    // =====================================
+    // DASHBOARD KAPRODI
+    // =====================================
     public function index(Request $request): View
     {
         abort_unless($request->user()->role === 'kaprodi', 403);
@@ -125,12 +164,19 @@ class KaprodiDashboardController extends Controller
             ->join('users as dospem_1', 'dospem_1.id', '=', 'pengajuan.dospem_1_id')
             ->join('users as dospem_2', 'dospem_2.id', '=', 'pengajuan.dospem_2_id');
 
+        $approvalStatuses = [
+            'menunggu',
+            'ACC Dospem',
+            'ACC Dosen',
+            'disetujui',
+        ];
+
         $menungguCount = DB::table('pengajuan_judul')
-            ->whereRaw('LOWER(status) = ?', ['disetujui'])
+            ->whereIn('status', $approvalStatuses)
             ->count();
 
         $disahkanCount = DB::table('pengajuan_judul')
-            ->whereRaw('LOWER(status) = ?', ['acc final'])
+            ->where('status', 'ACC Final')
             ->count();
 
         $statistics = [
@@ -140,7 +186,7 @@ class KaprodiDashboardController extends Controller
         ];
 
         $menungguPengesahan = (clone $baseQuery)
-            ->whereRaw('LOWER(pengajuan.status) = ?', ['disetujui'])
+            ->whereIn('pengajuan.status', $approvalStatuses)
             ->select([
                 'pengajuan.id',
                 'pengajuan.judul',
@@ -159,8 +205,13 @@ class KaprodiDashboardController extends Controller
             ->get();
 
         $riwayat = (clone $baseQuery)
-            ->leftJoin('surat_pengesahan as surat', 'surat.pengajuan_id', '=', 'pengajuan.id')
-            ->whereRaw('LOWER(pengajuan.status) = ?', ['acc final'])
+            ->leftJoin(
+                'surat_pengesahan as surat',
+                'surat.pengajuan_id',
+                '=',
+                'pengajuan.id'
+            )
+            ->where('pengajuan.status', 'ACC Final')
             ->select([
                 'pengajuan.id',
                 'pengajuan.judul',
@@ -176,11 +227,69 @@ class KaprodiDashboardController extends Controller
             ->limit(8)
             ->get();
 
-        return view('kaprodi.dashboard', compact('statistics', 'menungguPengesahan', 'riwayat'));
+        return view('kaprodi.dashboard', compact(
+            'statistics',
+            'menungguPengesahan',
+            'riwayat'
+        ));
     }
 
-    public function sahkan(Request $request, int $pengajuan): RedirectResponse
-    {
+    // =====================================
+    // TAHAP 1: KAPRODI MENUNJUK DOSPEM
+    // =====================================
+    public function tunjukDospem(
+        Request $request,
+        int $pengajuan
+    ): RedirectResponse {
+        abort_unless($request->user()->role === 'kaprodi', 403);
+
+        $validated = $request->validate([
+            'dospem_final_id' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->where('role', 'dospem'),
+            ],
+        ]);
+
+        DB::transaction(function () use ($pengajuan, $validated): void {
+            $data = DB::table('pengajuan_judul')
+                ->where('id', $pengajuan)
+                ->lockForUpdate()
+                ->first();
+
+            abort_if($data === null, 404);
+
+            abort_unless(
+                $data->status === 'menunggu',
+                422,
+                'Pengajuan ini tidak sedang menunggu penunjukan dosen.'
+            );
+
+            DB::table('pengajuan_judul')
+                ->where('id', $pengajuan)
+                ->update([
+                    'dospem_final_id' => $validated['dospem_final_id'],
+                    'status' => 'Menunggu Review Dospem',
+                    'updated_at' => now(),
+                ]);
+        });
+
+        return redirect()
+            ->route('kaprodi.dashboard')
+            ->with(
+                'success',
+                'Dosen berhasil ditunjuk. Pengajuan diteruskan ke dosen pembimbing.'
+            );
+    }
+
+    // =====================================
+    // TAHAP 2: KAPRODI MENGESAHKAN JUDUL
+    // SETELAH DOSPEM MEMBERIKAN ACC
+    // =====================================
+    public function sahkan(
+        Request $request,
+        int $pengajuan
+    ): RedirectResponse {
         abort_unless($request->user()->role === 'kaprodi', 403);
 
         DB::transaction(function () use ($pengajuan, $request): void {
@@ -190,19 +299,37 @@ class KaprodiDashboardController extends Controller
                 ->first();
 
             abort_if($data === null, 404);
+
+            // Hanya pengajuan yang sudah ACC Dospem yang dapat disahkan.
             abort_unless(
-                strtolower((string) $data->status) === 'disetujui',
+                in_array($data->status, [
+                    'ACC Dospem',
+                    'ACC Dosen',
+                    'disetujui',
+                ], true),
                 422,
-                'Pengajuan ini belum disetujui kedua dosen pembimbing.'
+                'Pengajuan ini belum mendapatkan ACC dari dosen pembimbing.'
             );
 
-            $nomorSk = sprintf('SK/%s/%06d', now()->format('Y'), $data->id);
+            // Dosen harus sudah ditunjuk Kaprodi.
+            abort_unless(
+                $data->dospem_final_id !== null,
+                422,
+                'Dosen pembimbing belum ditunjuk oleh Kaprodi.'
+            );
+
+            $now = now();
+            $nomorSk = sprintf(
+                'SK/%s/%06d',
+                $now->format('Y'),
+                $data->id
+            );
 
             DB::table('pengajuan_judul')
                 ->where('id', $data->id)
                 ->update([
                     'status' => 'ACC Final',
-                    'updated_at' => now(),
+                    'updated_at' => $now,
                 ]);
 
             DB::table('surat_pengesahan')->updateOrInsert(
@@ -212,15 +339,18 @@ class KaprodiDashboardController extends Controller
                     'dospem_1_id' => $data->dospem_1_id,
                     'dospem_2_id' => $data->dospem_2_id,
                     'nomor_sk' => $nomorSk,
-                    'tanggal_disetujui' => now()->toDateString(),
-                    'updated_at' => now(),
-                    'created_at' => now(),
+                    'tanggal_disetujui' => $now->toDateString(),
+                    'updated_at' => $now,
+                    'created_at' => $now,
                 ]
             );
         });
 
         return redirect()
             ->route('kaprodi.dashboard')
-            ->with('success', 'Judul berhasil disahkan dan nomor SK telah dibuat.');
+            ->with(
+                'success',
+                'Judul berhasil disahkan dan nomor SK telah dibuat.'
+            );
     }
 }

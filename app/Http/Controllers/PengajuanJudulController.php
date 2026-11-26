@@ -293,7 +293,10 @@ class PengajuanJudulController extends Controller
                 'file_proposal' => $filePath,
                 'dospem_1_id' => $pengajuan->dospem_1_id,
                 'dospem_2_id' => $pengajuan->dospem_2_id,
-                'status' => 'menunggu',
+                // Revisi dikirim kembali kepada dosen yang telah ditunjuk Kaprodi.
+                'status' => $pengajuan->dospem_final_id
+                    ? 'Menunggu Review Dospem'
+                    : 'menunggu',
                 'updated_at' => now(),
             ]);
 

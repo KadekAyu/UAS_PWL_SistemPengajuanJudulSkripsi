@@ -1,10 +1,11 @@
 @php
     $user = auth()->user();
 
+    // Ringkasan jumlah review milik dosen yang sedang login.
     $totalReview = $riwayat->count();
-    $totalAcc = $riwayat->filter(fn($item) => in_array(strtolower($item->keputusan ?? ''), ['acc', 'disetujui']))->count();
-    $totalRevisi = $riwayat->filter(fn($item) => strtolower($item->keputusan ?? '') === 'revisi')->count();
-    $totalDitolak = $riwayat->filter(fn($item) => strtolower($item->keputusan ?? '') === 'ditolak')->count();
+    $totalAcc = $riwayat->filter(fn($item) => in_array(strtolower($item->status ?? ''), ['acc', 'disetujui', 'acc dospem', 'acc dosen', 'acc final']))->count();
+    $totalRevisi = $riwayat->filter(fn($item) => strtolower($item->status ?? '') === 'revisi')->count();
+    $totalDitolak = $riwayat->filter(fn($item) => strtolower($item->status ?? '') === 'ditolak')->count();
 @endphp
 
 <!DOCTYPE html>
@@ -14,6 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Review - SISTA</title>
 
+    {{-- Memuat aset Vite; gunakan CDN Tailwind jika aset build belum tersedia. --}}
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
@@ -41,13 +43,13 @@
 
     <div class="min-h-screen md:flex">
 
-        <!-- SIDEBAR DOSPEM -->
+        <!-- Sidebar: menu navigasi antarhalaman Dosen Pembimbing. -->
         <x-sidebar-dospem />
 
-        <!-- MAIN CONTENT -->
+        <!-- Konten utama di sebelah kanan sidebar. -->
         <main class="min-w-0 flex-1">
 
-            <!-- TOPBAR -->
+            <!-- Topbar: bagian atas halaman untuk breadcrumb dan informasi akun dosen. -->
             <x-topbar-dospem>
                 <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
 
@@ -129,7 +131,7 @@
 
                         </div>
 
-                        <!-- FILTER STATUS -->
+                        <!-- Filter untuk menampilkan review berdasarkan keputusan dosen. -->
                         <div class="mt-4 border-t border-slate-100 pt-3">
 
                             <div class="mb-2">
@@ -196,10 +198,10 @@
 
                     </div>
 
-                    <!-- DAFTAR TABEL -->
+                    <!-- Tabel riwayat diisi dari data review yang dikirim controller. -->
                     @if ($riwayat->isNotEmpty())
 
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto pb-6">
 
                             <table class="w-full min-w-[640px] text-left text-xs">
 
@@ -219,9 +221,10 @@
                                     @foreach ($riwayat as $item)
 
                                         @php
-                                            $statusFilter = in_array(strtolower($item->keputusan ?? ''), ['acc', 'disetujui'])
+                                            // Samakan berbagai label ACC agar memakai filter 'disetujui'.
+                                            $statusFilter = in_array(strtolower($item->status ?? ''), ['acc', 'disetujui', 'acc dospem', 'acc dosen', 'acc final'])
                                                 ? 'disetujui'
-                                                : strtolower($item->keputusan ?? '');
+                                                : strtolower($item->status ?? '');
                                         @endphp
 
                                         <tr
@@ -238,7 +241,7 @@
                                                 </p>
 
                                                 <p class="mt-1 text-[10px] text-slate-400">
-                                                    {{ $item->npm_mahasiswa ?? '-' }}
+                                                    {{ $item->npm ?? '-' }}
                                                 </p>
                                             </td>
 
@@ -247,19 +250,19 @@
                                             </td>
 
                                             <td class="whitespace-nowrap px-5 py-3 text-slate-500">
-                                                {{ !empty($item->tanggal_review) ? \Carbon\Carbon::parse($item->tanggal_review)->format('d/m/Y') : '-' }}
+                                                {{ !empty($item->created_at) ? \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') : '-' }}
                                             </td>
 
                                             <td class="px-5 py-3">
                                                 <span class="rounded-full px-3 py-1 text-[10px] font-semibold {{
-                                                    match(strtolower($item->keputusan ?? '')) {
-                                                        'acc', 'disetujui' => 'bg-emerald-50 text-emerald-700',
+                                                    match(strtolower($item->status ?? '')) {
+                                                        'acc', 'disetujui', 'acc dospem', 'acc dosen', 'acc final' => 'bg-emerald-50 text-emerald-700',
                                                         'revisi' => 'bg-orange-50 text-orange-700',
                                                         'ditolak' => 'bg-rose-50 text-rose-700',
                                                         default => 'bg-sky-50 text-sky-700',
                                                     }
                                                 }}">
-                                                    {{ ucfirst($item->keputusan ?? '-') }}
+                                                    {{ ucfirst($item->status ?? '-') }}
                                                 </span>
                                             </td>
 
@@ -284,7 +287,7 @@
 
                                     @endforeach
 
-                                    <!-- PESAN FILTER KOSONG -->
+                                    <!-- Pesan yang muncul jika filter tidak menemukan data. -->
                                     <tr id="filter-empty" class="hidden">
                                         <td colspan="6" class="px-5 py-10 text-center">
 
@@ -350,7 +353,7 @@
 
     </div>
 
-    <!-- FILTER JAVASCRIPT -->
+    <!-- JavaScript filter mengatur baris yang tampil tanpa memuat ulang halaman. -->
     <script>
         function filterRiwayat(status, button) {
             const rows = document.querySelectorAll('.riwayat-row');
