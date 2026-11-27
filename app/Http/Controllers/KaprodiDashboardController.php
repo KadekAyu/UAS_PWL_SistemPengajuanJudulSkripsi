@@ -22,6 +22,7 @@ class KaprodiDashboardController extends Controller
             'menunggu',
             'ACC Dospem',
             'ACC Dosen',
+            'disetujui',
         ];
 
         $pengajuanMasuk = DB::table('pengajuan_judul as pengajuan')
@@ -75,6 +76,7 @@ class KaprodiDashboardController extends Controller
                 '=',
                 'pengajuan.id'
             )
+            ->leftJoin('users as dospem_final', 'dospem_final.id', '=', 'pengajuan.dospem_final_id')
             ->where('pengajuan.id', $pengajuan)
             ->select([
                 'pengajuan.id',
@@ -82,12 +84,14 @@ class KaprodiDashboardController extends Controller
                 'pengajuan.abstrak',
                 'pengajuan.file_proposal',
                 'pengajuan.status',
+                'pengajuan.dospem_final_id',
                 'pengajuan.created_at',
                 'pengajuan.updated_at',
                 'mahasiswa.name as nama_mahasiswa',
                 'mahasiswa.npm',
                 'dospem_1.name as nama_dospem_1',
                 'dospem_2.name as nama_dospem_2',
+                'dospem_final.name as nama_dospem_final',
                 'surat.nomor_sk',
                 'surat.tanggal_disetujui',
             ])
@@ -95,7 +99,12 @@ class KaprodiDashboardController extends Controller
 
         abort_if($detail === null, 404);
 
-        return view('kaprodi.pengajuan.show', compact('detail'));
+        $daftarDosen = DB::table('users')
+            ->where('role', 'dospem')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('kaprodi.pengajuan.show', compact('detail', 'daftarDosen'));
     }
 
     // =====================================
@@ -251,7 +260,7 @@ class KaprodiDashboardController extends Controller
             ],
         ]);
 
-        DB::transaction(function () use ($pengajuan, $validated): void {
+        $message = DB::transaction(function () use ($pengajuan, $validated): string {
             $data = DB::table('pengajuan_judul')
                 ->where('id', $pengajuan)
                 ->lockForUpdate()
@@ -260,26 +269,37 @@ class KaprodiDashboardController extends Controller
             abort_if($data === null, 404);
 
             abort_unless(
-                $data->status === 'menunggu',
+                in_array($data->status, ['menunggu', 'disetujui'], true),
                 422,
-                'Pengajuan ini tidak sedang menunggu penunjukan dosen.'
+                'Pengajuan ini tidak dapat menerima penunjukan dosen.'
+            );
+
+            $isLegacyApproval = $data->status === 'disetujui';
+
+            abort_unless(
+                !$isLegacyApproval || $data->dospem_final_id === null,
+                422,
+                'Dosen final untuk pengajuan lama sudah ditunjuk.'
             );
 
             DB::table('pengajuan_judul')
                 ->where('id', $pengajuan)
                 ->update([
                     'dospem_final_id' => $validated['dospem_final_id'],
-                    'status' => 'Menunggu Review Dospem',
+                    'status' => $isLegacyApproval
+                        ? $data->status
+                        : 'Menunggu Review Dospem',
                     'updated_at' => now(),
                 ]);
+
+            return $isLegacyApproval
+                ? 'Dosen final berhasil ditunjuk. Pengajuan lama siap disahkan.'
+                : 'Dosen berhasil ditunjuk. Pengajuan diteruskan ke dosen pembimbing.';
         });
 
         return redirect()
             ->route('kaprodi.dashboard')
-            ->with(
-                'success',
-                'Dosen berhasil ditunjuk. Pengajuan diteruskan ke dosen pembimbing.'
-            );
+            ->with('success', $message);
     }
 
     // =====================================

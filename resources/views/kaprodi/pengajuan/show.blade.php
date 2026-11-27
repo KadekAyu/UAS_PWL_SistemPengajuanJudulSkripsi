@@ -64,18 +64,6 @@
 
     $cleanFilename = $displayFilename ?: $fileBasename;
 
-    // Daftar dosen sementara untuk form penunjukan.
-
-    // Nanti dipindahkan ke controller agar lebih rapi.
-
-    $daftarDosen = \App\Models\User::query()
-
-        ->where('role', 'dospem')
-
-        ->orderBy('name')
-
-        ->get(['id', 'name']);
-
 @endphp
 
 <!DOCTYPE html>
@@ -689,29 +677,77 @@
 
                             <h3 class="mb-3 border-b border-slate-100 pb-2 text-xs font-bold text-slate-800">
 
-                                Status Pengajuan Lama
+                                Pengajuan Lama
 
                             </h3>
 
-                            <div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                            @if ($detail->dospem_final_id)
 
-                                <p class="text-xs font-semibold text-amber-800">
+                                <div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
 
-                                    Pengajuan Sudah Pernah Direview
+                                    <p class="text-xs font-semibold text-emerald-800">
 
-                                </p>
+                                        Dosen final: {{ $detail->nama_dospem_final }}
 
-                                <p class="mt-2 text-[11px] leading-relaxed text-amber-700">
+                                    </p>
 
-                                    Pengajuan ini menggunakan status dari alur sebelumnya.
+                                    <p class="mt-1 text-[11px] leading-relaxed text-emerald-700">
 
-                                    Data penunjukan dosen perlu diperiksa sebelum
+                                        Pengajuan berstatus disetujui dan siap untuk pengesahan akhir.
 
-                                    pengesahan akhir dapat dilakukan.
+                                    </p>
 
-                                </p>
+                                </div>
 
-                            </div>
+                                <form id="formSahkanJudul" action="{{ route('kaprodi.pengajuan.sahkan', $detail->id) }}"
+                                      method="POST">
+                                    @csrf
+                                    <button type="button"
+                                            onclick="document.getElementById('modalSahkanJudul').showModal()"
+                                            class="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-700">
+                                        Sahkan Judul
+                                    </button>
+                                </form>
+
+                            @else
+
+                                <div class="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                                    <p class="text-xs font-semibold text-amber-800">
+                                        Dosen final belum ditunjuk
+                                    </p>
+                                    <p class="mt-1 text-[11px] leading-relaxed text-amber-700">
+                                        Pilih dosen final terlebih dahulu sebelum melakukan pengesahan.
+                                    </p>
+                                </div>
+
+                                <form id="formTunjukDospem"
+                                      action="{{ route('kaprodi.pengajuan.tunjuk-dospem', $detail->id) }}"
+                                      method="POST">
+                                    @csrf
+                                    <label for="dospem_final_id"
+                                           class="mb-2 block text-xs font-semibold text-slate-600">
+                                        Dosen Final
+                                    </label>
+                                    <select id="dospem_final_id"
+                                            name="dospem_final_id"
+                                            required
+                                            class="mb-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-700 focus:border-sky-400 focus:ring-sky-400">
+                                        <option value="">Pilih dosen final</option>
+                                        @foreach ($daftarDosen as $dosen)
+                                            <option value="{{ $dosen->id }}"
+                                                @selected(old('dospem_final_id') == $dosen->id)>
+                                                {{ $dosen->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button"
+                                            onclick="bukaModalTunjuk()"
+                                            class="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-700">
+                                        Tunjuk Dosen Final
+                                    </button>
+                                </form>
+
+                            @endif
 
                         <!-- STATUS LAIN -->
 
